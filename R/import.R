@@ -16,14 +16,25 @@
 #' plug-ins for OpenSesame, usually only the \code{raw_data} need to be
 #' provided. All other arguments have sensible defaults.
 #'
-#' The column names for the timestamps, x- and y-positions are extracted using
-#' \link{grep} to find the column that starts with the respective character
-#' string (these will typically also contain the name of the item that was used
-#' to record them, such as \code{xpos_track_mouse}). This means that the exact
-#' column names do not have to be provided - as long as mouse-tracking data was
-#' collected only by a single item throughout the experiment (i.e., if only one
-#' column contains timestamps, xpos, and ypos respectively). Otherwise, the
-#' exact column names have to be specified.
+#' If the relevant timestamps, x-positions, and y-positions are each stored in 
+#' one variable, a character string specifying (parts of) the respective column 
+#' name needs to be provided. In this case, the column names are extracted using
+#' \link{grep} to find the column that starts with the respective character 
+#' string (in OpenSesame these will typically contain the name of the item that
+#' was used to record them, such as \code{xpos_get_response}). This means that
+#' the exact column names do not have to be provided - as long as only one 
+#' column starts with the respective character string (otherwise, the exact 
+#' column names have to be provided).
+#' 
+#' If several variables contain the timestamps, x-positions, and y-positions 
+#' within a trial (e.g., \code{xpos_part1} and \code{xpos_part2}), a vector of 
+#' the exact column names has to be provided (e.g., 
+#' \code{xpos_label=c("xpos_part1","xpos_part2"))}. \code{mt_import_mousetrap} 
+#' will then merge all raw data in the order with which the variable labels have
+#' been specified. If one variable contains NAs or an empty string in a trial, 
+#' these cases will be ignored (this covers the special case that, e.g., 
+#' \code{xpos_part2} is only relevant for some trials and contains NAs in the 
+#' other trials).
 #'
 #' \code{duplicates} allows for different options to handle duplicate timestamps
 #' within a trial: \itemize{ \item{\code{remove_first}: First timestamp and
@@ -32,11 +43,11 @@
 #' removed.} \item{\code{ignore}: Duplicates are kept.} }
 #'
 #' @param raw_data a data.frame containing the raw data.
-#' @param xpos_label a character string specifying the name of the column in
+#' @param xpos_label a character string specifying the name of the column(s) in
 #'   which the x-positions are stored (see Details).
-#' @param ypos_label a character string specifying the name of the column in
+#' @param ypos_label a character string specifying the name of the column(s) in
 #'   which the y-positions are stored (see Details).
-#' @param timestamps_label a character string specifying the name of the column
+#' @param timestamps_label a character string specifying the name of the column(s)
 #'   in which the timestamps are stored (see Details).
 #' @param mt_id_label an optional character string specifying the name of the
 #'   column that provides a unique ID for every trial in the raw data. If
@@ -74,7 +85,7 @@ mt_import_mousetrap <- function(raw_data,
   xpos_label="xpos", ypos_label="ypos",
   timestamps_label="timestamps",
   mt_id_label=NULL,
-  split=", ", duplicates="remove_first",
+  split=",", duplicates="remove_first",
   reset_timestamps=TRUE,
   show_progress=TRUE) {
 
@@ -100,35 +111,79 @@ mt_import_mousetrap <- function(raw_data,
   }
 
   rownames(raw_data) <- raw_data[,mt_id]
-
-  # Search for variables in data.frame corresponding to the labels
-  check_columns <- function(var) {
-    colname <- grep(paste0("^", var), colnames(raw_data), value=TRUE)
-    if (length(colname) == 1) {
-      return(colname)
-    } else if (length(colname) > 0) {
-      stop(paste(
-        "More than one variable in data.frame starts with the label",
-        var, "- please specify a unique label."
-      ))
-    } else {
-      stop(
-        "No variable in data.frame starts with the label ",
-        var,
-        " - please specify a correct variable."
-      )
+  
+  # Get length of label variables
+  n_labels <- c(length(xpos_label),length(ypos_label),length(timestamps_label))
+  
+  
+  # If more than one label per variable is provided,
+  # join data stored in the different variables
+  if (any(n_labels>1)) {
+    
+    if (any(n_labels!=n_labels[1])){
+      stop("xpos_label, ypos_label, and timestamps_label differ in their length.")
     }
+    
+    join_data <- function(m){
+      m[is.na(m)] <- ""
+      return(apply(m,MARGIN = 1,paste,collapse=split))
+    }
+    
+    raw_data[,timestamps_label[1]] <- join_data(raw_data[,timestamps_label,drop=FALSE])  
+    raw_data[,xpos_label[1]] <- join_data(raw_data[,xpos_label,drop=FALSE])  
+    raw_data[,ypos_label[1]] <- join_data(raw_data[,ypos_label,drop=FALSE])  
+    
+    mt_labels <- c(timestamps=timestamps_label[1], xpos=xpos_label[1], ypos=ypos_label[1])
+    columns <- mt_labels
+    names(columns) <- mt_labels
+    
+
+  # If only one label per variable is provided, allow for partial specification
+  # of the variable name and search for it in the data.frame
+  } else {
+    
+    check_columns <- function(var) {
+      
+      # Extract all columns starting with the respective string
+      colname <- grep(paste0("^", var), colnames(raw_data), value=TRUE)
+      if (length(colname) == 1) {
+        return(colname)
+      } else if (length(colname) > 0) {
+        stop(paste(
+          "More than one variable in data.frame starts with the label",
+          var, "- please specify a unique label."
+        ))
+      } else {
+        stop(
+          "No variable in data.frame starts with the label ",
+          var,
+          " - please specify a correct variable."
+        )
+      }
+    }
+    
+    mt_labels <- c(timestamps=timestamps_label, xpos=xpos_label, ypos=ypos_label)
+    columns <- sapply(mt_labels, check_columns)
+    names(columns) <- mt_labels
+    
   }
 
-  mt_labels <- c(timestamps=timestamps_label, xpos=xpos_label, ypos=ypos_label)
-  columns <- sapply(mt_labels, check_columns)
-  names(columns) <- mt_labels
 
   # Split data
   split_raw_data <- function(x) {
-    x <- gsub(pattern="(\\[|\\])", replacement="", x)
+    
+    # Remove all irrelevant characters
+    x <- gsub(pattern=paste0("[^-0123456789.",split,"]"),replacement = "", x)
+    
+    # Remove leading / end / double split characters
+    x <- gsub(pattern=paste0("^",split),replacement = "", x)
+    x <- gsub(pattern=paste0(split,"$"),replacement = "", x)
+    x <- gsub(pattern=paste0(split,split),replacement = "", x)
+    
+    # Split according to specified character
     x <- strsplit(x, split=split)
-    return(as.integer(unlist(x)))
+    
+    return(as.numeric(unlist(x)))
   }
 
   data_list <- apply(raw_data[,columns], c(1, 2), split_raw_data)
@@ -164,13 +219,23 @@ mt_import_mousetrap <- function(raw_data,
       trajectories[i,xpos,] <- data_list[,i,columns[xpos_label]]
       trajectories[i,ypos,] <- data_list[,i,columns[ypos_label]]
     }
+    
+    
+    # Check timestamps
+    
+    # Extract timestamps
+    current_timestamps <- trajectories[i,timestamps,]
+    current_timestamps <- current_timestamps[1:sum(!is.na(current_timestamps))]
+    
+    # Check that timestamps are monotonically increasing
+    if (any(diff(current_timestamps)<0)) {
+      warning("For some trajectories timestamps are not monotonically increasing.")
+    }
 
-    # Check for duplicated timestamps
+    # Check for duplicates
     if (duplicates != "ignore") {
       if (duplicates %in% c("remove_first", "remove_last")) {
-        current_timestamps <- trajectories[i,timestamps,]
-        current_timestamps <- current_timestamps[1:sum(!is.na(current_timestamps))]
-
+        
         if (anyDuplicated(current_timestamps) > 0) {
           current_xpos <- trajectories[i, xpos, 1:length(current_timestamps)]
           current_ypos <- trajectories[i, ypos, 1:length(current_timestamps)]
@@ -228,7 +293,12 @@ mt_import_mousetrap <- function(raw_data,
   }
 
   # Drop raw data columns
-  raw_data <- raw_data[, !colnames(raw_data) %in% columns]
+  if (any(n_labels>1)) {
+    raw_data <- raw_data[, !colnames(raw_data) %in% 
+      c(timestamps_label,xpos_label,ypos_label)]
+  } else {
+    raw_data <- raw_data[, !colnames(raw_data) %in% columns]
+  }
 
   return(c(list("data"=raw_data, "trajectories"=trajectories)))
 }
