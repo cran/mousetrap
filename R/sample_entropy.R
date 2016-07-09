@@ -27,10 +27,7 @@
 #' function by Hehman et al. (2015) is used. Finally, it is also possible to 
 #' calculate sample_entropy values using both functions ("both").
 #'
-#' @param data a mousetrap data object created using one of the mt_import 
-#'   functions (see \link{mt_example} for details).
-#' @param use a character string specifying which trajectory data should be
-#'   used.
+#' @inheritParams mt_time_normalize
 #' @param save_as a character string specifying where the calculated measures
 #'   should be stored.
 #' @param method a character string specifying the method used for calculating
@@ -41,8 +38,6 @@
 #' @param lag an integer passed on to the sample entropy function (see Details).
 #' @param r a numeric value passed on to the sample entropy function (see
 #'   Details).
-#' @param show_progress logical indicating whether function should report on the
-#'   progress.
 #'   
 #' @return A mousetrap data object (see \link{mt_example}).
 #'   
@@ -51,6 +46,9 @@
 #'   additional column(s) (by merging them using the \link{mt_id} variable).
 #'   
 #'   If not, an additional \link{data.frame} will be added.
+#'   
+#'   If a trajectory array was provided directly as \code{data}, only the 
+#'   data.frame will be returned.
 #'   
 #' @references Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
 #'   responses in the time course of categorizing atypical exemplars.
@@ -126,7 +124,7 @@ mt_sample_entropy <- function(data,
   
   # Prepare data
   trajectories <- extract_data(data=data, use=use)
-  if (!(dimension %in% colnames(data$trajectories))) {
+  if (!(dimension %in% colnames(trajectories))) {
     stop(paste("Dimension", dimension, "not found in trajectory array."))
   }
   
@@ -213,11 +211,17 @@ mt_sample_entropy <- function(data,
   rownames(results) <- results[,mt_id]
   results <- cbind(results,data.frame(measures))
   
-  if (save_as %in% names(data)) {
-    data[[save_as]] <- merge(data[[save_as]], results, by=mt_id)
-  } else {
-    data[[save_as]] <- results
+  
+  if (is_mousetrap_data(data)){
+    if (save_as %in% names(data)) {
+      data[[save_as]] <- merge(data[[save_as]], results, by=mt_id)
+    } else {
+      data[[save_as]] <- results
+    }
+    return(data)
+    
+  }else{
+    return(results)
   }
   
-  return(data)
 }

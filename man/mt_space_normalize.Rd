@@ -10,7 +10,8 @@ mt_space_normalize(data, use = "trajectories", save_as = "sn_trajectories",
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import 
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory 
+array can be provided directly (in this case \code{use} will be ignored).}
 
 \item{use}{a character string specifying which trajectory data should be 
 used.}
@@ -21,24 +22,25 @@ data should be stored.}
 \item{xpos_start}{an integer specifying the value the first x-position should
 have in each trial.}
 
-\item{xpos_end}{an (optional) integer specifying the value the last
-x-position should have in each trial. If unspecified (the default),
-trajectories are only adjusted so that they have the same start position.}
+\item{xpos_end}{an integer specifying the value the last x-position should
+have in each trial. If \code{NULL}, trajectories are only adjusted so that
+they have the same start position.}
 
 \item{ypos_start}{an integer specifying the value the first y-position should
 have in each trial.}
 
-\item{ypos_end}{an (optional) integer specifying the value the last
-y-position should have in each trial. If unspecified (the default),
-trajectories are only adjusted so that they have the same start position.}
+\item{ypos_end}{an integer specifying the value the last y-position should
+have in each trial. If  \code{NULL}, trajectories are only adjusted so that
+they have the same start position.}
 
-\item{show_progress}{logical indicating whether function should report its 
+\item{show_progress}{logical indicating whether function should report on its
 progress.}
 }
 \value{
 A mousetrap data object (see \link{mt_example}) with an additional
   array (by default called \code{sn_trajectories}) containing the 
-  space-normalized trajectories.
+  space-normalized trajectories. If a trajectory array was provided directly
+  as \code{data}, only the space-normalized trajectories will be returned.
 }
 \description{
 Adjust trajectories so that all trajectories have an identical start and end
@@ -58,6 +60,9 @@ Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
   \emph{Memory & Cognition, 35}(1), 15-28.
 }
 \seealso{
-\link{mt_remap_symmetric} for remapping trajectories.
+\link{mt_align_start} for aligning the start position of
+  trajectories.
+  
+  \link{mt_remap_symmetric} for remapping trajectories.
 }
 

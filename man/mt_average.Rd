@@ -10,7 +10,8 @@ mt_average(data, use = "trajectories", save_as = "av_trajectories",
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import 
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory 
+array can be provided directly (in this case \code{use} will be ignored).}
 
 \item{use}{a character string specifying which trajectory data should be 
 used.}
@@ -34,13 +35,14 @@ of the \code{interval_size}). If specified, only values will be used for
 averaging where the dimension values are smaller than \code{max_interval}.
 If unspecified (the default), all values will be included.}
 
-\item{show_progress}{logical indicating whether function should report its 
+\item{show_progress}{logical indicating whether function should report on its
 progress.}
 }
 \value{
 A mousetrap data object (see \link{mt_example}) with an additional 
   array (by default called \code{av_trajectories}) that contains the average 
-  trajectory data per dimension interval.
+  trajectory data per dimension interval. If a trajectory array was provided 
+  directly as \code{data}, only the average trajectories will be returned.
   
   For the dimension values, the mid point of the respective interval is 
   reported, which is helpful for plotting the trajectory data later on. 

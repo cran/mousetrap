@@ -15,10 +15,7 @@
 #' typically result from mouse clicks in the experiment.
 #' 
 #' 
-#' @param data a mousetrap data object created using one of the mt_import 
-#'   functions (see \link{mt_example} for details).
-#' @param use a character string specifying which trajectory data should be
-#'   used.
+#' @inheritParams mt_time_normalize
 #' @param desired an optional integer. If specified, additional statistics are
 #'   computed concerning the (relative) frequencies with which exactly the
 #'   desired timestamp difference (with tolerance 1e-12) occurred.
@@ -33,7 +30,7 @@
 mt_check_resolution <- function(data, use="trajectories", desired=NULL) {
   
   trajectories <- extract_data(data=data,use=use)
-  timestamps <- mt_variable_labels["timestamps"]
+  timestamps <- mt_variable_labels[["timestamps"]]
   
   # Compute steps in the timestamps
   if(dim( trajectories )[1] == 1) {

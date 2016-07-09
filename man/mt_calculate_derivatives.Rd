@@ -5,14 +5,16 @@
 \title{Calculate distance, velocity, and acceleration.}
 \usage{
 mt_calculate_derivatives(data, use = "trajectories", save_as = use,
-  dimension = "xypos", acc_on_abs_vel = FALSE, show_progress = TRUE)
+  dimension = "xypos", prefix = "", acc_on_abs_vel = FALSE,
+  show_progress = TRUE)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import 
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory 
+array can be provided directly (in this case \code{use} will be ignored).}
 
-\item{use}{a character string specifying which trajectory data should be used
-(defaults to 'trajectories')}
+\item{use}{a character string specifying which trajectory data should be 
+used.}
 
 \item{save_as}{a character string specifying where the resulting trajectory 
 data should be stored.}
@@ -22,17 +24,21 @@ distances, velocity, and acceleration are calculated. By default ("xypos"),
 they are calculated across both x and y dimensions. Alternatively, only the
 x- ("xpos") or the y- ("ypos") dimension can be used.}
 
+\item{prefix}{an optional character string that is added as a prefix to the 
+to be created new trajectory dimensions.}
+
 \item{acc_on_abs_vel}{logical indicating if acceleration should be calculated
 based on absolute velocity values (ignoring direction). Only relevant if 
 velocity can be negative (see Details).}
 
-\item{show_progress}{logical indicating whether function should report its 
+\item{show_progress}{logical indicating whether function should report on its
 progress.}
 }
 \value{
 A mousetrap data object (see \link{mt_example}) with 
   Euclidian distance, velocity, and acceleration added as additional columns 
-  to the trajectory array.
+  to the trajectory array. If the trajectory array was provided directly as
+  \code{data}, only the trajectory array will be returned.
 }
 \description{
 Calculate distance traveled, velocity, and acceleration for each logged 

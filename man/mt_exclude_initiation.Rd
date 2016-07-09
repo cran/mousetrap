@@ -9,7 +9,8 @@ mt_exclude_initiation(data, use = "trajectories", save_as = use,
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import 
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory 
+array can be provided directly (in this case \code{use} will be ignored).}
 
 \item{use}{a character string specifying which trajectory data should be 
 used.}
@@ -20,12 +21,14 @@ data should be stored.}
 \item{reset_timestamps}{logical indicating whether the timestamps should be 
 reset after removing the initial phase without movement (see Details).}
 
-\item{show_progress}{logical indicating whether function should report its 
+\item{show_progress}{logical indicating whether function should report on its
 progress.}
 }
 \value{
-A mousetrap data object (see \link{mt_example}) from which the
-  initial phase without mouse movement was removed.
+A mousetrap data object (see \link{mt_example}) from which the 
+  initial phase without mouse movement was removed. If the trajectory array
+  was provided directly as \code{data}, only the trajectory array will be
+  returned.
 }
 \description{
 Exclude the initial phase in a trial where the mouse was not moved. The 
