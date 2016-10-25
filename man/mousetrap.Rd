@@ -36,8 +36,8 @@ following, a brief overview of the functions in this package is given.
   A number of functions are available that perform preprocessing operations 
   typically used before analyzing mouse-tracking data.
   
-  \link{mt_remap_symmetric} remaps mouse trajectories so that they share a 
-  common direction.
+  \link{mt_remap_symmetric} remaps mouse trajectories to one side (or one
+  quadrant) of the coordinate system.
   
   \link{mt_exclude_initiation}	excludes the initial phase of a trial without 
   mouse movement.
@@ -58,6 +58,9 @@ following, a brief overview of the functions in this package is given.
   
   \link{mt_subset}	filters mouse-tracking data by trials, such that are only
   those meeting defined criteria are included.
+  
+  \link{mt_add_variables} adds new, self created variables to a trajectory 
+  array.
 }
 
 \section{Analysis functions}{
@@ -67,13 +70,13 @@ following, a brief overview of the functions in this package is given.
   trajectories have been established in the existing literature. The following 
   functions implement many of these approaches.
   
-  \link{mt_calculate_derivatives} calculates distance, velocity, and 
+  \link{mt_derivatives} calculates distance, velocity, and 
   acceleration for trajectories.
   
-  \link{mt_calculate_deviations} calculates the deviations from an idealized
+  \link{mt_deviations} calculates the deviations from an idealized
   trajectory (straight line).
   
-  \link{mt_calculate_measures}	calculates a set of mouse-tracking measures.
+  \link{mt_measures}	calculates a set of mouse-tracking measures.
   
   \link{mt_sample_entropy}	calculates sample entropy.
   
@@ -90,7 +93,7 @@ following, a brief overview of the functions in this package is given.
   trajectories.
 }
 
-\section{Reshaping and aggregation functions}{
+\section{Reshaping, aggregation, and export functions}{
 
   
   A number of helper functions are provided for aggregating, plotting, and 
@@ -103,6 +106,10 @@ following, a brief overview of the functions in this package is given.
   
   \link{mt_aggregate_per_subject}	aggregates mouse-tracking data per 
   (within subjects-) condition separately for each subject.
+  
+  \link{mt_export_long} exports mouse-tracking data in long format.
+
+  \link{mt_export_wide} exports mouse-tracking data in wide format.
 }
 
 \section{Visualization functions}{
@@ -139,9 +146,9 @@ mt_example <- mt_import_mousetrap(mt_example_raw)
 mt_example <- mt_remap_symmetric(mt_example)
 mt_example <- mt_align_start(mt_example)
 mt_example <- mt_time_normalize(mt_example)
-mt_example <- mt_calculate_derivatives(mt_example)
-mt_example <- mt_calculate_deviations(mt_example)
-mt_example <- mt_calculate_measures(mt_example)
+mt_example <- mt_derivatives(mt_example)
+mt_example <- mt_deviations(mt_example)
+mt_example <- mt_measures(mt_example)
 
 average_measures <- mt_aggregate(
   mt_example, use="measures",
