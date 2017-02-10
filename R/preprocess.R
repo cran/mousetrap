@@ -33,7 +33,6 @@
 #' @param nsteps an integer specifying the number of equally sized time steps.
 #' @param verbose logical indicating whether function should report its
 #'   progress.
-#' @param show_progress Deprecated. Please use \code{verbose} instead.
 #'
 #' @return A mousetrap data object (see \link{mt_example}) with an additional
 #'   array (by default called \code{tn_trajectories}) containing the
@@ -57,24 +56,20 @@
 #' mt_example <- mt_time_normalize(mt_example,
 #'   save_as="tn_trajectories", nsteps=101)
 #'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_time_normalize <- function(data,
                               use="trajectories", save_as="tn_trajectories",
                               dimensions=c("xpos","ypos"), timestamps="timestamps",
                               nsteps=101,
-                              verbose=FALSE,show_progress=NULL) {
-
-  if (is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call. = FALSE
-    )
-    verbose <- show_progress
-  }
-
+                              verbose=FALSE) {
+  
   if (length(dimensions) == 1 & dimensions[[1]] == "all") {
-    dimensions <- colnames(trajectories)
+    dimensions <- dimnames(trajectories)[[3]]
     dimensions <- dimensions[dimensions!=timestamps]
   }
 
@@ -83,11 +78,11 @@ mt_time_normalize <- function(data,
 
   # Create empty array for output
   tn_trajectories <- array(
-    dim=c(nrow(trajectories), 2+length(dimensions), nsteps),
+    dim=c(nrow(trajectories), nsteps, 2+length(dimensions)),
     dimnames=list(
       dimnames(trajectories)[[1]],
-      c(timestamps, dimensions, "steps"),
-      NULL
+      NULL,
+      c(timestamps, dimensions, "steps")
     )
   )
 
@@ -97,17 +92,17 @@ mt_time_normalize <- function(data,
     # for coordinates.
 
     # Timestamps
-    tn_trajectories[i,timestamps,] <- stats::approx(
-      trajectories[i,timestamps,], trajectories[i,timestamps,], n=nsteps)$y
+    tn_trajectories[i,,timestamps] <- stats::approx(
+      trajectories[i,,timestamps], trajectories[i,,timestamps], n=nsteps)$y
 
     # Specified trajectory dimensions
     for (dimension in dimensions) {
-      tn_trajectories[i,dimension,] <- stats::approx(
-        trajectories[i,timestamps,], trajectories[i,dimension,], n=nsteps)$y
+      tn_trajectories[i,,dimension] <- stats::approx(
+        trajectories[i,,timestamps], trajectories[i,,dimension], n=nsteps)$y
     }
 
     # Label steps as such
-    tn_trajectories[i,"steps",] <- 1:nsteps
+    tn_trajectories[i,,"steps"] <- 1:nsteps
 
     if (verbose) {
       if (i %% 100 == 0) message(paste(i, "trials finished"))
@@ -173,6 +168,11 @@ mt_time_normalize <- function(data,
 #' mt_example <- mt_import_mousetrap(mt_example_raw)
 #' mt_example <- mt_remap_symmetric(mt_example,
 #'   remap_xpos="no", remap_ypos="up")
+#'   
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
 #'
 #' @export
 mt_remap_symmetric <- function(
@@ -197,28 +197,28 @@ mt_remap_symmetric <- function(
   # Remap values
   for (i in 1:nrow(trajectories)) {
     # Determine the length (in samples) of all trajectories
-    nlogs <- sum(!is.na(trajectories[i, xpos, ]))
+    nlogs <- sum(!is.na(trajectories[i, , xpos]))
 
     # Remap x values (if desired)
     if (remap_xpos != 'no') {
       if (
         # Remap tracks that are headed in the undesired
         # direction (as measured by their endpoint) ...
-        (remap_xpos == 'left'  & trajectories[i, xpos, nlogs] > 0) |
-        (remap_xpos == 'right' & trajectories[i, xpos, nlogs] < 0)
+        (remap_xpos == 'left'  & trajectories[i, nlogs, xpos] > 0) |
+        (remap_xpos == 'right' & trajectories[i, nlogs, xpos] < 0)
       ) {
         # ... by reversing the x coordinate
-        trajectories[i,xpos,] <- (-trajectories[i, xpos, ])
+        trajectories[i, , xpos] <- (-trajectories[i, , xpos])
       }
     }
 
     # Do likewise for y values
     if (remap_ypos != 'no') {
       if (
-        (remap_ypos == 'up'   & trajectories[i, ypos, nlogs] < 0) |
-        (remap_ypos == 'down' & trajectories[i, ypos, nlogs] > 0)
+        (remap_ypos == 'up'   & trajectories[i, nlogs, ypos] < 0) |
+        (remap_ypos == 'down' & trajectories[i, nlogs, ypos] > 0)
       ) {
-        trajectories[i, ypos, ] <- (-trajectories[i, ypos, ])
+        trajectories[i, , ypos] <- (-trajectories[i, , ypos])
       }
     }
 
@@ -266,43 +266,39 @@ mt_remap_symmetric <- function(
 #' mt_example <- mt_exclude_initiation(mt_example,
 #'   save_as="mod_trajectories")
 #'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_exclude_initiation <- function(data,
   use="trajectories", save_as=use,
   dimensions=c("xpos","ypos"), timestamps="timestamps",
   reset_timestamps=TRUE,
-  verbose=FALSE, show_progress=NULL) {
-
-  if(is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call. = FALSE
-    )
-    verbose <- show_progress
-  }
-
+  verbose=FALSE) {
+  
   # Gather necessary data
   trajectories <- extract_data(data=data, use=use)
 
   # Only keep relevant dimensions
-  trajectories <- trajectories[,c(timestamps, dimensions),,drop=FALSE]
+  trajectories <- trajectories[,,c(timestamps, dimensions),drop=FALSE]
 
   # Calculate number of logs
-  nlogs <- rowSums(!is.na(trajectories[, timestamps, , drop=FALSE]))
+  nlogs <- mt_count(trajectories, dimensions = timestamps)
 
   # Exclude phase where mouse stayed on start coordinates
   for (i in 1:nrow(trajectories)) {
 
     # Extract trajectory data
-    current_trajectories <- trajectories[i, , 1:nlogs[i]]
+    current_trajectories <- trajectories[i, 1:nlogs[i],]
 
     # Iterate over trajectories
-    current_timestamps <- current_trajectories[timestamps,]
-    current_points <- current_trajectories[dimensions,,drop=FALSE]
+    current_timestamps <- current_trajectories[,timestamps]
+    current_points <- current_trajectories[,dimensions,drop=FALSE]
 
     # Vector indicating if mouse has not left the starting point
-    on_start <- cumsum(colSums(abs(current_points - current_points[,1]))) == 0
+    on_start <- cumsum(rowSums(abs(current_points - current_points[1,]))) == 0
 
     # Change last element where mouse is still on starting point so that this
     # point is included in the calculations
@@ -310,14 +306,14 @@ mt_exclude_initiation <- function(data,
 
     # Exclude data without movements
     current_timestamps <- current_timestamps[!on_start]
-    current_points <- current_points[,!on_start]
+    current_points <- current_points[!on_start,]
 
     # Clear data in array
     trajectories[i,,] <- NA
 
     # Add data to array
-    trajectories[i, timestamps, 1:length(current_timestamps)] <- current_timestamps
-    trajectories[i, dimensions, 1:length(current_timestamps)] <- current_points
+    trajectories[i, 1:length(current_timestamps), timestamps] <- current_timestamps
+    trajectories[i, 1:length(current_timestamps), dimensions] <- current_points
 
     if (verbose) {
       if (i %% 100 == 0) message(paste(i, "trials finished"))
@@ -330,7 +326,7 @@ mt_exclude_initiation <- function(data,
 
   # Reset timestamps (optional)
   if (reset_timestamps) {
-    trajectories[,timestamps,] <- trajectories[, timestamps, ] - trajectories[, timestamps, 1]
+    trajectories[,,timestamps] <- trajectories[, , timestamps] - trajectories[, 1, timestamps]
   }
 
   return(create_results(data=data, results=trajectories, use=use, save_as=save_as))
@@ -339,9 +335,11 @@ mt_exclude_initiation <- function(data,
 
 #' Space normalize trajectories.
 #'
-#' Adjust trajectories so that all trajectories have an identical start and end
-#' point. If no end points are provided, trajectories are only adjusted so that
-#' they have the same start position.
+#' Adjust trajectories so that all trajectories have an identical start and end 
+#' point. If no end points are provided, trajectories are only adjusted so that 
+#' they have the same start position. Please note that this function is 
+#' \strong{deprecated} and that \link{mt_align_start_end} should be used
+#' instead, which provides the same (and additional) functionality.
 #'
 #' @inheritParams mt_time_normalize
 #' @param dimensions a character vector specifying the dimensions in the
@@ -352,10 +350,6 @@ mt_exclude_initiation <- function(data,
 #'   i.e., the values the last recorded position should have in every trial. If
 #'   \code{NULL}, trajectories are only adjusted so that they have the same
 #'   start position.
-#' @param xpos_start Deprecated. Please use \code{start} instead.
-#' @param xpos_end Deprecated. Please use \code{end} instead.
-#' @param ypos_start Deprecated. Please use \code{start} instead.
-#' @param ypos_end Deprecated. Please use \code{end} instead.
 #'
 #' @return A mousetrap data object (see \link{mt_example}) with an additional
 #'   array (by default called \code{sn_trajectories}) containing the
@@ -374,9 +368,16 @@ mt_exclude_initiation <- function(data,
 #'   \link{mt_remap_symmetric} for remapping trajectories.
 #'
 #' @examples
+#' \dontrun{
 #' mt_example <- mt_space_normalize(mt_example,
 #'   save_as ="sn_trajectories",
 #'   start=c(0,0), end=c(-1,1))
+#' }
+#'   
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
 #'
 #' @export
 mt_space_normalize <- function(
@@ -384,67 +385,149 @@ mt_space_normalize <- function(
   use="trajectories", save_as="sn_trajectories",
   dimensions=c("xpos", "ypos"),
   start=c(0, 0), end=NULL,
-  verbose=FALSE,
-  xpos_start = NULL, xpos_end = NULL,
-  ypos_start = NULL, ypos_end = NULL,
-  show_progress=NULL) {
-
-  if (is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call. = FALSE
-    )
-    verbose <- show_progress
-  }
-
-  if (is.null(xpos_start) == FALSE & is.null(ypos_start) == FALSE) {
-    warning(
-      "The arguments xpos_start and ypos_start have been deprecated. ",
-      "Please use start instead.",
-      call. = FALSE
-    )
-    start <- c(xpos_start, ypos_start)
-  }
-
-  if (is.null(xpos_end) == FALSE & is.null(ypos_end) == FALSE) {
-    warning(
-      "The arguments xpos_end and ypos_end have been deprecated. ",
-      "Please use end instead.",
-      call. = FALSE
-    )
-    end <- c(xpos_end, ypos_end)
-  }
-
+  verbose=FALSE) {
+  
+  .Deprecated("mt_align_start_end")
+  
   # Preparation
   trajectories <- extract_data(data=data,use=use)
-
-  # Perform space normalization
+  
+  # Perform alignment
   for (i in 1:nrow(trajectories)) {
     for (j in 1:length(dimensions)) {
-
-      current_positions <- trajectories[i, dimensions[[j]], ]
+      
+      current_positions <- trajectories[i, , dimensions[[j]]]
       nlogs <- sum(!is.na(current_positions))
-
+      
       current_positions <- current_positions - current_positions[1]
       if (!is.null(end)) {
         current_positions <- current_positions / (current_positions[nlogs] - current_positions[1])
         current_positions <- current_positions * (end[[j]]-start[[j]])
       }
-      trajectories[i, dimensions[[j]], ] <-  current_positions + start[[j]]
-
+      trajectories[i, , dimensions[[j]]] <-  current_positions + start[[j]]
+      
     }
-
+    
     if (verbose) {
       if (i %% 100 == 0) message(paste(i, "trials finished"))
     }
   }
-
+  
   if (verbose) {
     message(paste("all", i, "trials finished"))
   }
-
+  
   return(create_results(data=data, results=trajectories, use=use, save_as=save_as))
+}
+
+
+#' Align start and end position of trajectories.
+#'
+#' Adjust trajectories so that all trajectories have an identical start and end 
+#' point. In some articles, this is also referred to as space-normalization
+#' (e.g. Dale et al., 2007).
+#'
+#' @inheritParams mt_time_normalize
+#' @param dimensions a character vector specifying the dimensions in the
+#'   trajectory array that should be aligned.
+#' @param start a numeric vector specifying the start values for each dimension,
+#'   i.e., the values the first recorded position should have in every trial. If
+#'   \code{NULL}, trajectories are aligned to the mean first position across all
+#'   trials.
+#' @param end a numeric vector specifying the end values for each dimension, 
+#'   i.e., the values the last recorded position should have in every trial. If 
+#'   \code{NULL}, trajectories are aligned to the mean last position across all 
+#'   trials. Note that in this case trajectories should be remapped to one side 
+#'   before alignment (e.g., using \link{mt_remap_symmetric}) so that the mean
+#'   last position is meaningful.
+#'
+#' @return A mousetrap data object (see \link{mt_example}) with aligned 
+#'   trajectories. All other trajectory dimensions not specified in
+#'   \code{dimensions} (e.g., timestamps) will be kept as is in the resulting
+#'   trajectory array. If the trajectory array was provided directly as
+#'   \code{data}, only the trajectory array will be returned.
+#'
+#' @references Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
+#'   responses in the time course of categorizing atypical exemplars.
+#'   \emph{Memory & Cognition, 35}(1), 15-28.
+#'
+#' @seealso \link{mt_align_start} for aligning the start position of 
+#'   trajectories.
+#'   
+#'   \link{mt_align} as a general purpose function for aligning and rescaling 
+#'   trajectories.
+#'   
+#'   \link{mt_remap_symmetric} for remapping trajectories.
+#'
+#' @examples
+#' # Align start and end positions to specific coordinates
+#' mt_example <- mt_align_start_end(mt_example,
+#'   start=c(0,0), end=c(-1,1))
+#'   
+#'   
+#' # Import raw trajectories for demonstration
+#' mt_example <- mt_import_mousetrap(mt_example_raw)
+#' 
+#' # Remap trajectories
+#' mt_example <- mt_remap_symmetric(mt_example)
+#' 
+#' # Align trajectories to mean first and last coordinates
+#' mt_example <- mt_align_start_end(mt_example,
+#'   start=NULL, end=NULL)
+#' 
+#'   
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#'
+#' @export
+mt_align_start_end <- function(
+  data,
+  use="trajectories", save_as=use,
+  dimensions=c("xpos", "ypos"),
+  start=c(0, 0), end=c(-1,1),
+  verbose=FALSE) {
+  
+  # Preparation
+  trajectories <- extract_data(data=data,use=use)
+  
+  # Get end points
+  trajectories_last <-
+    t(apply(trajectories[,,dimensions,drop=FALSE],1,
+          function(x) x[max(which(rowSums(is.na(x))==0)),]))
+  
+  # If no start coordinates are provided, compute them
+  if(is.null(start)){
+    start <- colMeans(trajectories[,1,dimensions,drop=FALSE])
+    if(verbose) {
+      message("No start coordinates were provided. ",
+              "Aligning to: ",paste(start,collapse=","))
+    }
+  }
+  
+  # If no start coordinates are provided, compute them
+  if(is.null(end)){
+    end <- colMeans(trajectories_last)
+    if(verbose) {
+      message("No end coordinates were provided. ",
+              "Aligning to: ",paste(end,collapse=","))
+    }
+  }
+  
+  
+  # Perform alignment
+  for (j in 1:length(dimensions)) {
+    
+    trajectories[, , dimensions[[j]]] <- 
+      ((trajectories[, , dimensions[[j]]] - trajectories[, 1, dimensions[[j]]])/
+        (trajectories_last[,dimensions[[j]]] - trajectories[, 1, dimensions[[j]]]))*
+           (end[[j]]-start[[j]]) + start[[j]]
+    
+  }
+  
+  return(create_results(data=data, results=trajectories, use=use, save_as=save_as))
+  
 }
 
 
@@ -452,37 +535,72 @@ mt_space_normalize <- function(
 #'
 #' Adjust trajectories so that all trajectories have the same start position.
 #'
-#' @inheritParams mt_space_normalize
+#' @inheritParams mt_align_start_end
 #'
-#' @return A mousetrap data object (see \link{mt_example}) with aligned
-#'   trajectories. If the trajectory array was provided directly as \code{data},
-#'   only the trajectory array will be returned.
+#' @return A mousetrap data object (see \link{mt_example}) with aligned 
+#'   trajectories. All other trajectory dimensions not specified in
+#'   \code{dimensions} (e.g., timestamps) will be kept as is in the resulting
+#'   trajectory array. If the trajectory array was provided directly as
+#'   \code{data}, only the trajectory array will be returned.
 #'
-#' @seealso \link{mt_space_normalize} for space normalizing trajectories.
+#' @seealso \link{mt_align_start_end}  for aligning the start and end position
+#'   of trajectories.
+#'   
+#'   \link{mt_align} as a general purpose function for aligning and rescaling 
+#'   trajectories.
 #'
 #' \link{mt_remap_symmetric} for remapping trajectories.
 #'
 #' @examples
+#' # Import raw trajectories for demonstration
+#' mt_example <- mt_import_mousetrap(mt_example_raw)
+#' 
+#' # Align trajectories to start coordinates (0,0)
 #' mt_example <- mt_align_start(mt_example,
 #'   start=c(0,0))
+#'   
 #'
+#' # Import raw trajectories for demonstration
+#' mt_example <- mt_import_mousetrap(mt_example_raw)
+#' 
+#' # Align trajectories to mean first coordinates
+#' mt_example <- mt_align_start(mt_example,
+#'   start=NULL)
+#'   
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_align_start <- function(
   data,
-  use="trajectories", save_as="trajectories",
+  use="trajectories", save_as=use,
   dimensions=c("xpos","ypos"), start=c(0,0),
-  verbose=FALSE,
-  xpos_start=NULL, ypos_start=NULL,
-  show_progress=NULL) {
+  verbose=FALSE) {
 
-  return(
-    mt_space_normalize(
-      data=data, use=use, save_as=save_as,
-      start=start, end=NULL,
-      xpos_start=xpos_start, ypos_start=ypos_start,
-      verbose=verbose, show_progress=show_progress
-    )
-  )
+  # Preparation
+  trajectories <- extract_data(data=data,use=use)
+  
+  # If no start coordinates are provided, compute them
+  if(is.null(start)){
+    start <- colMeans(trajectories[,1,dimensions,drop=FALSE])
+    if(verbose) {
+      message("No start coordinates were provided. ",
+              "Aligning to: ",paste(start,collapse=","))
+    }
+  }
+  
+  # Perform start alignment
+  for (j in 1:length(dimensions)) {
+    
+    trajectories[, , dimensions[[j]]] <- trajectories[, , dimensions[[j]]] - 
+      trajectories[, 1, dimensions[[j]]] + start[[j]]
+    
+  }
+  
+  return(create_results(data=data, results=trajectories, use=use, save_as=save_as))
+  
 }
 
 
@@ -506,6 +624,12 @@ mt_align_start <- function(
 #' interest). In case that a trial does not contain samples at the specified
 #' timestamps, linear interpolation is performed using the two adjacent
 #' timestamps.
+#' 
+#' If a number is specified for \code{constant_interpolation}, constant instead 
+#' of linear interpolation will be performed for all adjacent timestamps whose 
+#' difference exceeds this number. Specifically, a period without mouse movement
+#' will be assumed starting at the respective timestamp until the next timestamp
+#' - \code{constant_interpolation/2}.
 #'
 #' Note that \code{mt_resample} does not average across time intervals. For
 #' this, \link{mt_average} can be used.
@@ -519,6 +643,11 @@ mt_align_start <- function(
 #' @param exact_last_timestamp logical indicating if the last timestamp should
 #'   always be appended (which is the case by default). If \code{FALSE}, the
 #'   last timestamp is only appended if it is a multiple of the step_size.
+#' @param constant_interpolation an optional integer. If specified, constant 
+#'   instead of linear interpolation will be performed for all adjacent 
+#'   timestamps whose difference exceeds the number specified for
+#'   \code{constant_interpolation}. The unit corresponds to the unit of the
+#'   timestamps.
 #'
 #' @return A mousetrap data object (see \link{mt_example}) with an additional
 #'   array (by default called \code{rs_trajectories}) containing the resampled
@@ -537,24 +666,21 @@ mt_align_start <- function(
 #'   save_as="rs_trajectories",
 #'   step_size=50)
 #'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_resample <- function(data,
   use="trajectories", save_as="rs_trajectories",
   dimensions=c("xpos", "ypos"), timestamps="timestamps",
   step_size=10, exact_last_timestamp=TRUE,
-  verbose=FALSE, show_progress=NULL) {
-
-  if(is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call. = FALSE
-    )
-    verbose <- show_progress
-  }
-
+  constant_interpolation = NULL,
+  verbose=FALSE) {
+  
   if (length(dimensions) == 1 & dimensions[[1]] == "all") {
-    dimensions <- colnames(trajectories)
+    dimensions <- dimnames(trajectories)[[3]]
     dimensions <- dimensions[dimensions != timestamps]
   }
 
@@ -563,21 +689,21 @@ mt_resample <- function(data,
 
   # Calculate the number of steps after resampling
   max_steps <- ceiling(
-    max(trajectories[,timestamps,], na.rm=TRUE) / step_size
+    max(trajectories[,,timestamps], na.rm=TRUE) / step_size
   ) + 1
 
   # Create an empty output array
   rs_trajectories <- array(
-    dim=c(nrow(trajectories), 1+length(dimensions), max_steps),
+    dim=c(nrow(trajectories), max_steps, 1+length(dimensions)),
     dimnames=list(
       dimnames(trajectories)[[1]],
-      c(timestamps, dimensions),
-      NULL
+      NULL,
+      c(timestamps, dimensions)
     )
   )
 
   # Check if there are trajectories where first timestamp is > 0:
-  if (max(trajectories[,timestamps,1]) > 0) {
+  if (max(trajectories[,1,timestamps]) > 0) {
     message(
       "Trajectories detected where first timestamp is greater than 0. ",
       "Assuming period without movement starting at timestamp 0."
@@ -586,20 +712,39 @@ mt_resample <- function(data,
 
   # Perform downsampling
   for (i in 1:nrow(trajectories)) {
+    
     current_trajectories <- trajectories[i,,]
-    current_timestamps <- current_trajectories[timestamps, ]
+    current_timestamps <- current_trajectories[,timestamps]
     nlogs <- sum(!is.na(current_timestamps))
 
     # If first timestamp is > 0, add another with
     # a timestamp of zero and the first recorded position
     if (current_timestamps[1] > 0) {
       current_timestamps <- c(0, current_timestamps)
-      current_trajectories <- cbind(current_trajectories[,1], current_trajectories)
+      current_trajectories <- rbind(current_trajectories[1,], current_trajectories)
       nlogs <- nlogs + 1
+    }
+    
+    # If a threshold for constant interpolation is specified,
+    # add end positions for timestamp periods that exceed threshold
+    # (end timestamp is next timestamp - constant_interpolation/2)
+    if (is.null(constant_interpolation)==FALSE){
+      diff_current_timestamps <- diff(current_timestamps)
+      j <- 1
+      while (j<nlogs){
+        if(diff_current_timestamps[j]>constant_interpolation){
+          diff_current_timestamps <- diff_current_timestamps[c(1:j,j:(nlogs-1))]
+          current_timestamps <- c(current_timestamps[1:j],current_timestamps[j+1]-constant_interpolation/2,current_timestamps[(j+1):nlogs])
+          current_trajectories <- current_trajectories[c(1:j,j:nlogs),]
+          nlogs <- nlogs + 1
+          j <- j+1
+        }
+        j <- j+1
+      }
     }
 
     current_timestamps <- current_timestamps[1:nlogs]
-    current_trajectories <- current_trajectories[,1:nlogs]
+    current_trajectories <- current_trajectories[1:nlogs,]
     max_time <- current_timestamps[nlogs]
 
     # Generate new timestamps
@@ -612,12 +757,12 @@ mt_resample <- function(data,
 
     # Perform linear interpolation using custom steps
     int_timestamps <- stats::approx(current_timestamps, current_timestamps, xout=custom_timesteps)$y
-    rs_trajectories[i,timestamps,1:length(int_timestamps)] <- int_timestamps
+    rs_trajectories[i,1:length(int_timestamps),timestamps] <- int_timestamps
 
     # Perform linear interpolation for specified trajectory dimensions
     for (dimension in dimensions) {
-      rs_trajectories[i,dimension,1:length(int_timestamps)] <- stats::approx(
-        current_timestamps, current_trajectories[dimension,], xout=custom_timesteps)$y
+      rs_trajectories[i,1:length(int_timestamps),dimension] <- stats::approx(
+        current_timestamps, current_trajectories[,dimension], xout=custom_timesteps)$y
     }
 
     if (verbose) {
@@ -696,6 +841,11 @@ mt_resample <- function(data,
 #'
 #' \link{mt_resample} for resampling trajectories using a constant time
 #' interval.
+#' 
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
 #'
 #' @examples
 #' mt_example <- mt_derivatives(mt_example)
@@ -717,17 +867,8 @@ mt_average <- function(data,
   dimensions="all", av_dimension="timestamps",
   intervals=NULL, interval_size=100, max_interval=NULL,
   verbose=FALSE,
-  dimension=NULL, show_progress=NULL) {
-
-  if (is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call.=FALSE
-    )
-    verbose <- show_progress
-  }
-
+  dimension=NULL) {
+  
   if (is.null(dimension) == FALSE) {
     warning(
       "The argument dimension is deprecated. ",
@@ -739,12 +880,12 @@ mt_average <- function(data,
 
   trajectories <- extract_data(data=data,use=use)
 
-  if (!av_dimension %in% dimnames(trajectories)[[2]]) {
+  if (!av_dimension %in% dimnames(trajectories)[[3]]) {
     stop("Dimension '",av_dimension,"' not found in trajectory array.")
   }
 
   if (length(dimensions) == 1 & dimensions[[1]] == "all") {
-    dimensions <- colnames(trajectories)
+    dimensions <- dimnames(trajectories)[[3]]
     dimensions <- dimensions[dimensions!=av_dimension]
   }
 
@@ -754,7 +895,7 @@ mt_average <- function(data,
       # Determine this number automatically based on
       # the given interval size
       max_n_intervals <- ceiling(
-        max(trajectories[,av_dimension,], na.rm=TRUE) / interval_size
+        max(trajectories[,,av_dimension], na.rm=TRUE) / interval_size
       )
 
     } else {
@@ -777,17 +918,17 @@ mt_average <- function(data,
 
   # Create an empty output array
   av_trajectories <- array(
-    dim=c(nrow(trajectories), 1+length(dimensions), max_n_intervals),
+    dim=c(nrow(trajectories), max_n_intervals, 1+length(dimensions)),
     dimnames=list(
       dimnames(trajectories)[[1]],
-      c(av_dimension,dimensions),
-      NULL
+      NULL,
+      c(av_dimension,dimensions)
     )
   )
 
   for (i in 1:nrow(trajectories)) {
 
-    current_av_values <- trajectories[i,av_dimension,]
+    current_av_values <- trajectories[i,,av_dimension]
     nlogs <- sum(!is.na(current_av_values))
     current_av_values <- current_av_values[1:nlogs]
 
@@ -811,14 +952,14 @@ mt_average <- function(data,
     nintervals <- length(lower_borders)
 
     if (is.null(intervals)) {
-      av_trajectories[i,av_dimension,1:nintervals] <- lower_borders + interval_size / 2
+      av_trajectories[i,1:nintervals,av_dimension] <- lower_borders + interval_size / 2
     } else {
-      av_trajectories[i,av_dimension,1:nintervals] <- intervals[1:nintervals] + diff(intervals[1:(nintervals+1)]) / 2
+      av_trajectories[i,1:nintervals,av_dimension] <- intervals[1:nintervals] + diff(intervals[1:(nintervals+1)]) / 2
     }
 
     for (var in dimensions) {
       # Manipulate specified variables
-      current_measures <- trajectories[i, var, 1:nlogs]
+      current_measures <- trajectories[i, 1:nlogs, var]
 
       # Perform averaging
       av_measures <- sapply(1:nintervals, function(j) {
@@ -827,7 +968,7 @@ mt_average <- function(data,
         return(mean(current_measures[in_interval], na.rm=TRUE))
       })
 
-      av_trajectories[i,var,1:nintervals] <- av_measures
+      av_trajectories[i,1:nintervals,var] <- av_measures
     }
 
     if (verbose) {
@@ -889,6 +1030,11 @@ mt_average <- function(data,
 #' mt_example <- mt_measures(mt_example)
 #' mt_example_mad_sub <- mt_subset(mt_example, MAD<400, check="measures")
 #'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_subset <- function(data, subset, check="data") {
 
@@ -904,9 +1050,23 @@ mt_subset <- function(data, subset, check="data") {
   for (use in names(data)) {
 
     if (length(dim(data[[use]])) == 2) {
-      data[[use]] <- data[[use]][
-        rownames(data[[use]]) %in% rownames(data[[check]]),,drop=FALSE
-        ]
+      
+      # for special case of square matrices (e.g., distmat) remove both columns and rows
+      if(class(data[[use]])[1]=="matrix" & dim(data[[use]])[1]==dim(data[[use]])[2]){
+        data[[use]] <- data[[use]][
+          rownames(data[[use]]) %in% rownames(data[[check]]),
+          rownames(data[[use]]) %in% rownames(data[[check]]),
+          drop=FALSE
+          ]
+        
+      # otherwise, only remove rows
+      } else {
+        data[[use]] <- data[[use]][
+          rownames(data[[use]]) %in% rownames(data[[check]]),,drop=FALSE
+          ]
+      }
+      
+      
     } else {
       data[[use]] <- data[[use]][
         rownames(data[[use]]) %in% rownames(data[[check]]),,,drop=FALSE
@@ -918,88 +1078,57 @@ mt_subset <- function(data, subset, check="data") {
 }
 
 
-#' Add new variables to trajectory array.
+#' Count number of observations.
 #'
-#' Add new variables to the trajectory array (and remove potentially existing
-#' variables of the same name). This is mostly a helper function used by other
-#' functions in this package (e.g., \link{mt_deviations}). However, it
-#' can also be helpful if the user has calculated new variables for each logged
-#' coordinate and wants to add them to an existing trajectory array.
+#' Count number of observations per trial for a specified dimension (or several)
+#' in the trajectory array. This is mostly a helper function used by other
+#' functions in this package.
 #'
 #' @inheritParams mt_time_normalize
-#' @param variables either a character vector specifying the name of the new
-#'   variables that should be added to the trajectory array. In this case, the
-#'   new variables are added as additional columns to the trajectory array
-#'   filled with \code{NA}s. Or a list of matrices that each contain the data of
-#'   one of the to be added variables. In this case, the new variables with
-#'   their values are added as additional columns to the trajectory array.
-#' @return A mousetrap data object (see \link{mt_example}) where the new
-#'   variables have been added as additional columns to the trajectory array.
-#'   Depending on the input to \code{variables}, the values for the added
-#'   variables are either \code{NA}s or their actual values. If columns of the
-#'   same name already existed, they have been removed. If the trajectory array
-#'   was provided directly as \code{data}, only the trajectory array will be
-#'   returned.
+#' @param dimensions a character vector specifying the name of the dimension(s)
+#'   that should be used for counting the number of observations. If several
+#'   dimensions are specified, the number of complete observations are reported.
+#' @return A mousetrap data object (see \link{mt_example}).
+#'   
+#'   If a data.frame with label specified in \code{save_as} (by default 
+#'   "measures") already exists, the number of obervations (called \code{nobs})
+#'   are added as additional column. If not, an additional \link{data.frame}
+#'   will be added.
+#'   
+#'   If a trajectory array was provided directly as \code{data}, only a named
+#'   character vector will be returned.
 #'
 #' @examples
-#' # Calculate new (arbitrary) variables for this example
-#' # ... the sum of the x- and y-positions
-#' xy_sum <- mt_example$trajectories[,"xpos",] + mt_example$trajectories[,"ypos",]
-#' # ... the product of the x- and y-positions
-#' xy_prod <- mt_example$trajectories[,"xpos",] * mt_example$trajectories[,"ypos",]
+#' # Retrieve vector that counts number of observations
+#' mt_count(mt_example$trajectories)
 #'
-#' # Add the new variables to the trajectory array
-#' mt_example <- mt_add_variables(mt_example,
-#'   variables=list(xy_sum=xy_sum, xy_prod=xy_prod))
-#'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
 #' @export
-mt_add_variables <- function(data,
-                             use="trajectories", save_as=use,
-                             variables) {
-
+mt_count <- function(data,
+                     use="trajectories", save_as="measures",
+                     dimensions="xpos") {
+  
   # Extract trajectories
   trajectories <- extract_data(data=data,use=use)
-
-  # If variables are provided as list with actual data,
-  # extract variable names
-  if (is.list(variables)) {
-    data_list <- variables
-    variables <- names(variables)
-  } else if (is.vector(variables)) {
-    data_list <- NULL
+  
+  # Count number of observations
+  if(length(dimensions)==1){
+    nobs <- rowSums(!is.na(trajectories[,,dimensions,drop=FALSE]))
   } else {
-    stop("Variables can either be a vector or a list.")
+    nobs <- apply(trajectories[,,dimensions,drop=FALSE],1,function(x){
+      sum(rowSums(is.na(x))==0)
+    })
   }
-
-  # Remove potentially existing variables in original array
-  trajectories <- trajectories[
-    ,
-    !dimnames(trajectories)[[2]] %in% variables,
-    , drop=FALSE]
-
-  # Setup new array
-  trajectories_ext <- array(
-    dim=dim(trajectories) + c(0, length(variables), 0),
-    dimnames=list(
-      dimnames(trajectories)[[1]],
-      c(
-        dimnames(trajectories)[[2]],
-        variables
-      ),
-      dimnames(trajectories)[[3]]
-    )
-  )
-
-  # Fill it with existing data
-  trajectories_ext[,dimnames(trajectories)[[2]],] <-
-    trajectories[,dimnames(trajectories)[[2]],]
-
-  # Add new data if new data was provided
-  if (is.null(data_list) == FALSE) {
-    for (var in variables) {
-      trajectories_ext[,var,] <- data_list[[var]]
-    }
+  
+  # Return results
+  if(is_mousetrap_data(data)==FALSE){
+    return(nobs)
+  } else{
+    return(create_results(
+      data=data, results=data.frame(nobs), use=use, save_as=save_as,
+      ids=rownames(trajectories), overwrite=FALSE))
   }
-
-  return(create_results(data=data, results=trajectories_ext, use=use, save_as=save_as))
+  
 }

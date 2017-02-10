@@ -28,6 +28,11 @@
 #' @examples
 #' mt_check_resolution(mt_example)
 #' 
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_check_resolution <- function(data, use="trajectories",
   timestamps="timestamps", desired=NULL) {
@@ -36,9 +41,9 @@ mt_check_resolution <- function(data, use="trajectories",
 
   # Compute steps in the timestamps
   if(dim( trajectories )[1] == 1) {
-    log_diffs <- diff(trajectories[, timestamps, ])
+    log_diffs <- diff(trajectories[, , timestamps])
   } else {
-    log_diffs <- diff(t(trajectories[, timestamps, ]))
+    log_diffs <- diff(t(trajectories[, , timestamps]))
   }
   
   # Clean data type and remove empty values

@@ -50,12 +50,13 @@
 #' mt_plot_riverbed(mt_example)
 #' 
 #' \dontrun{
+#' # Create separate plots for typical and atypical trials
+#' mt_plot_riverbed(mt_example, facet_col="Condition")
+#' 
+#' 
 #' # Create riverbed plot for all trials with custom x and y axis labels
 #' mt_plot_riverbed(mt_example) +
 #'   ggplot2::xlab("Time step") + ggplot2::ylab("X coordinate")
-#' 
-#' # Create separate plots for typical and atypical trials
-#' mt_plot_riverbed(mt_example, facet_col="Condition")
 #' 
 #' # Note that it is also possible to replace the
 #' # default scale for fill with a custom scale
@@ -63,6 +64,11 @@
 #'   ggplot2::scale_fill_gradientn(colours=grDevices::heat.colors(9),
 #'     name="Frequency", trans="log", labels=scales::percent)
 #' }
+#' 
+#' @author
+#' Felix Henninger (\email{mailbox@@felixhenninger.com})
+#' 
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
 #' 
 #' @export
 mt_plot_riverbed <- function(data, use='tn_trajectories', 
@@ -75,7 +81,7 @@ mt_plot_riverbed <- function(data, use='tn_trajectories',
   # Calculate range of values on y axis,
   # if not specified explicitly
   if (is.null(y_range)) {
-    y_range <- range(trajectories[,y,])
+    y_range <- range(trajectories[,,y])
   }
   
   # Compute breaks based on the number of bins required
@@ -85,7 +91,7 @@ mt_plot_riverbed <- function(data, use='tn_trajectories',
   y_bins <- y_breaks[1:(length(y_breaks) - 1)] + diff(y_breaks) / 2
   
   # Extract number of steps on x axis
-  steps <- dim(trajectories)[3]
+  steps <- dim(trajectories)[2]
   
   # Prepare optional facet variables
   if (!is.null(facet_row)){
@@ -120,7 +126,7 @@ mt_plot_riverbed <- function(data, use='tn_trajectories',
       for (step in 1:steps) {
         
         # Extract data for current step
-        step_data <- trajectories[facet_row_value==facet_row_values & facet_col_values==facet_col_value,,step]
+        step_data <- trajectories[facet_row_value==facet_row_values & facet_col_values==facet_col_value,step,]
         
         # Calculate histogram based on this data
         step_hist <- graphics::hist(
@@ -157,10 +163,12 @@ mt_plot_riverbed <- function(data, use='tn_trajectories',
     }
   }
   
+  # Remove zero frequencies (coded in alpha)
+  riverbed <- riverbed[riverbed[,"alpha"]==TRUE,]
   
   # Create plot output
   output <- ggplot2::ggplot(ggplot2::aes_string(x='value_x', y='value_y', 
-      fill='frequency', alpha='alpha'), data=riverbed) +
+      fill='frequency'), data=riverbed) +
     ggplot2::geom_raster() +
     ggplot2::scale_fill_gradientn(colours=rev(RColorBrewer::brewer.pal(9, "YlOrRd")),
       name='Frequency', trans='log', labels=scales::percent) +

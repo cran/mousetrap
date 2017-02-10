@@ -22,21 +22,42 @@
 #' 
 #' The \strong{maximum absolute deviation} (\code{MAD}) is the maximum 
 #' perpendicular deviation from the straight path connecting start and end point
-#' of the trajectory (e.g., Freeman & Ambady, 2010). If the \code{MAD} occurs
-#' above the direct path, this is denoted by a positive value. If it occurs
+#' of the trajectory (e.g., Freeman & Ambady, 2010). If the \code{MAD} occurs 
+#' above the direct path, this is denoted by a positive value. If it occurs 
 #' below the direct path, this is denoted by a negative value. This assumes that
-#' the complete movement in the trial was from bottom to top (i.e., the end
+#' the complete movement in the trial was from bottom to top (i.e., the end 
 #' point has a higher y-position than the start point). In case the movement was
-#' from top to bottom, \code{mt_measures} automatically flips the
-#' signs. Both \code{MD_above} and  \code{MD_below} are also reported
-#' separately. The \strong{average deviation} (\code{AD}) is the average of all
-#' deviations across the trial.
+#' from top to bottom, \code{mt_measures} automatically flips the signs. Both
+#' \code{MD_above} and  \code{MD_below} are also reported separately.
+#' 
+#' The \strong{average deviation} (\code{AD}) is the average of all deviations 
+#' across the trial. Note that \code{AD} ignores the timestamps when calculating
+#' this average. This implicitly assumes that the time passed between each 
+#' recording of the mouse is the same within each individual trajectory. If the 
+#' \code{AD} is calculated using raw data that were obtained with an 
+#' approximately constant logging resolution (sampling rate), this assumption is
+#' usually justified (\link{mt_check_resolution} can be used to check this). 
+#' Alternatively, the \code{AD} can be calculated based on time-normalized 
+#' trajectories; these can be computed using \link{mt_time_normalize} which 
+#' creates equidistant time steps within each trajectory.
 #' 
 #' The \code{AUC} represents the \strong{area under curve}, i.e., the geometric
 #' area between the actual trajectory and the direct path. Areas above the
 #' direct path are added and areas below are subtracted. The \code{AUC} is
 #' calculated using the \link[pracma]{polyarea} function from the pracma
 #' package.
+#' 
+#' Note that all \strong{time} related measures (except \code{idle_time} and
+#' \code{hover_time}) are reported using the timestamp metric as present in the
+#' data. To interpret the timestamp values as time since tracking start, the
+#' assumption has to be made that for each trajectory the tracking started at
+#' timestamp 0 and that all timestamps indicate the time passed since tracking
+#' start. Therefore, all timestamps should be reset during data import by
+#' subtracting the value of the first timestamp from all timestamps within a
+#' trial (assuming that the first timestamp corresponds to the time when
+#' tracking started). Timestamps are reset by default when importing the data
+#' using one of the mt_import fuctions (e.g., \link{mt_import_mousetrap}).
+#' 
 #' 
 #' 
 #' @inheritParams mt_time_normalize
@@ -51,6 +72,10 @@
 #' @param flip_threshold a numeric value specifying the distance that needs to 
 #'   be exceeded in one direction so that a change in direction counts as a
 #'   flip.
+#' @param hover_threshold an optional numeric value. If specified, \code{hovers}
+#'   (and \code{hover_time})  will be calculated as the number (and total time)
+#'   of periods without movement in a trial (whose duration exceeds the value
+#'   specified in \code{hover_threshold}).
 #'   
 #' @return A mousetrap data object (see \link{mt_example}) where an additional 
 #'   \link{data.frame} has been added (by default called "measures") containing 
@@ -61,9 +86,11 @@
 #'   was provided directly as \code{data}, only the measures data.frame will be 
 #'   returned.
 #'   
-#'   The following measures are computed for each trajectory (the labels
-#'   relating to x- and y-positions will be adapted depending on the values
-#'   specified in \code{dimensions}):
+#'   The following measures are computed for each trajectory (the labels 
+#'   relating to x- and y-positions will be adapted depending on the values 
+#'   specified in \code{dimensions}). Please note that additional information is
+#'   provided in the Details section.
+#'   
 #'   \item{mt_id}{Trial ID (can be used for merging measures data.frame with
 #'   other trial-level data)}
 #'   \item{xpos_max}{Maximum x-position} 
@@ -84,15 +111,20 @@
 #'   \item{AUC}{Area under curve, the geometric area between the actual
 #'   trajectory and the direct path where areas below the direct path have been
 #'   subtracted}
-#'   \item{xpos_flips}{Number of directional changes along x-axis} 
-#'   \item{ypos_flips}{Number of directional changes along y-axis} 
+#'   \item{xpos_flips}{Number of directional changes along x-axis (exceeding the
+#'   distance specified in \code{flip_threshold})}
+#'   \item{ypos_flips}{Number of directional changes along y-axis (exceeding the
+#'   distance specified in \code{flip_threshold})}
 #'   \item{xpos_reversals}{Number of crossings of the y-axis} 
 #'   \item{ypos_reversals}{Number of crossings of the x-axis}
-#'   \item{RT}{Response time, the total time passed until a response was given}
-#'   \item{initiation_time}{Time passed until first mouse movement was 
-#'   initiated}
+#'   \item{RT}{Response time, time at which tracking stopped}
+#'   \item{initiation_time}{Time at which first mouse movement was initiated}
 #'   \item{idle_time}{Total time without mouse movement across the entirety of
 #'   the trial}
+#'   \item{hover_time}{Total time of all periods without movement in a trial 
+#'   (whose duration exceeds the value specified in \code{hover_threshold})} 
+#'   \item{hovers}{Number of periods without movement in a trial (whose duration
+#'   exceeds the value specified in \code{hover_threshold})}
 #'   \item{total_dist}{Total distance covered by the trajectory}
 #'   \item{vel_max}{Maximum velocity}
 #'   \item{vel_max_time}{Time at which maximum velocity occurred first}
@@ -101,9 +133,12 @@
 #'   \item{acc_max}{Maximum acceleration}
 #'   \item{acc_max_time}{Time at which maximum acceleration occurred first}
 #'   \item{acc_min}{Minimum acceleration} 
-#'   \item{acc_min_time}{Time where minimum acceleration occurred first} 
+#'   \item{acc_min_time}{Time at which minimum acceleration occurred first} 
 #'   
-#' @references Mousetrap
+#' @references Kieslich, P. J., Wulff, D. U., Henninger, F., Haslbeck, J. M. B.,
+#'   & Schulte-Mecklenbeck, M. (2017). Analyzing mouse- and hand-tracking data:
+#'   Methodological considerations and an open-source implementation. Manuscript
+#'   in preparation.
 #'   
 #'   Freeman, J. B., & Ambady, N. (2010). MouseTracker: Software for studying 
 #'   real-time mental processing using a computer mouse-tracking method. 
@@ -112,8 +147,6 @@
 #'   
 #'   
 #' @seealso \link{mt_sample_entropy} for calculating sample entropy.
-#' 
-#' \link{mt_movement_angle} for calculating the initial movement angle.
 #' 
 #' \link{mt_standardize} for standardizing the measures per subject.
 #' 
@@ -136,21 +169,18 @@
 #'   mt_example$data, mt_example$measures,
 #'   by="mt_id")
 #'   
-#' @describeIn mt_measures Calculate mouse-tracking measures
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_measures <- function(
   data,
   use="trajectories", save_as="measures",
   dimensions=c("xpos","ypos"), timestamps="timestamps",
-  flip_threshold=0,
-  verbose=FALSE, show_progress=NULL) {
-  
-  if(is.null(show_progress)==FALSE){
-    warning("The argument show_progress is deprecated. ",
-            "Please use verbose instead.",
-            call. = FALSE)
-    verbose <- show_progress
-  }
+  flip_threshold=0, hover_threshold=NULL,
+  verbose=FALSE) {
   
   if(length(dimensions)!=2){
     stop("For dimensions, exactly two trajectory dimensions have to be specified.")
@@ -169,10 +199,11 @@ mt_measures <- function(
   dim2_ideal <- paste0(dim2,"_ideal")
   
   # Calculate number of logs
-  nlogs <- rowSums(!is.na(trajectories[,dim1,,drop=FALSE]))
+  nlogs <- mt_count(trajectories,dimensions=dim1)
+  
   
   # Calculate deviations if no deviations were found in the data
-  if (!all(c(dev_ideal,dim1_ideal,dim2_ideal) %in% dimnames(trajectories)[[2]])) {
+  if (!all(c(dev_ideal,dim1_ideal,dim2_ideal) %in% dimnames(trajectories)[[3]])) {
     if (verbose) {
       message("Start calculating deviations of actual from idealized response trajectory.")
     }
@@ -185,7 +216,7 @@ mt_measures <- function(
   }
 
   # Setup variable matrix depending on whether timestamps are provided or not
-  if (timestamps %in% dimnames(trajectories)[[2]]) {
+  if (timestamps %in% dimnames(trajectories)[[3]]) {
     mt_measures <- c(
       paste0(dim1,c("_max","_min")),paste0(dim2,c("_max","_min")),
       "MAD", "MAD_time",
@@ -197,14 +228,21 @@ mt_measures <- function(
       "RT", "initiation_time", "idle_time"
     )
     
+    if(!is.null(hover_threshold)){
+      mt_measures <- c(mt_measures, "hover_time", "hovers")
+    }
+    
     # Check if there are trajectories where first timestamp is > 0:
-    if (max(trajectories[,timestamps,1]) > 0) {
+    if (max(trajectories[,1,timestamps]) > 0) {
       message(
         "Trajectories detected where first timestamp is greater than 0. ",
-        "Assuming period without movement starting at timestamp 0."
+        "Please see Details section of mt_measures documentation ",
+        "for interpretation of time related measures."
       )
-      # only affects _time variables
-    } else if (min(trajectories[,timestamps,1]) < 0) {
+    } 
+    
+    # Check if there are trajectories where first timestamp is < 0:
+    if (min(trajectories[,1,timestamps]) < 0) {
       stop(
         "Trajectories detected where first timestamp is smaller than 0. ",
         "Please check that trajectories were logged/imported correctly."
@@ -227,16 +265,16 @@ mt_measures <- function(
   
   # Add distance, velocity and acceleration-based measures
   # if the derivatives were precomputed
-  if (dist %in% dimnames(trajectories)[[2]]) {
+  if (dist %in% dimnames(trajectories)[[3]]) {
     mt_measures <- c(mt_measures, "total_dist")
   }
   
-  if (vel %in% dimnames(trajectories)[[2]] & timestamps %in% dimnames(trajectories)[[2]]) {
+  if (vel %in% dimnames(trajectories)[[3]] & timestamps %in% dimnames(trajectories)[[3]]) {
     mt_measures <- c(mt_measures, 
       "vel_max", "vel_max_time", "vel_min", "vel_min_time")
   }
   
-  if (acc %in% dimnames(trajectories)[[2]] & timestamps %in% dimnames(trajectories)[[2]]) {
+  if (acc %in% dimnames(trajectories)[[3]] & timestamps %in% dimnames(trajectories)[[3]]) {
     mt_measures <- c(mt_measures, 
       "acc_max", "acc_max_time", "acc_min", "acc_min_time")
   }
@@ -258,11 +296,11 @@ mt_measures <- function(
     current_nlogs <- nlogs[i]
     
     # Extract variables
-    current_dim1 <- trajectories[i, dim1, 1:current_nlogs]
-    current_dim2 <- trajectories[i, dim2, 1:current_nlogs]
-    current_dim1_ideal <- trajectories[i, dim1_ideal, 1:current_nlogs]
-    current_dim2_ideal <- trajectories[i, dim2_ideal, 1:current_nlogs]
-    current_dev_ideal <- trajectories[i, dev_ideal, 1:current_nlogs]
+    current_dim1 <- trajectories[i, 1:current_nlogs, dim1]
+    current_dim2 <- trajectories[i, 1:current_nlogs, dim2]
+    current_dim1_ideal <- trajectories[i, 1:current_nlogs, dim1_ideal]
+    current_dim2_ideal <- trajectories[i, 1:current_nlogs, dim2_ideal]
+    current_dev_ideal <- trajectories[i, 1:current_nlogs, dev_ideal]
     
     # Calculate min and max values for x and y
     measures[i,paste0(dim1,"_max")] <- max(current_dim1)
@@ -320,20 +358,11 @@ mt_measures <- function(
     
     # Check if timestamps are included and if so,
     # retrieve timestamps and calculate corresponding measures
-    if (timestamps %in% dimnames(trajectories)[[2]]) {
+    if (timestamps %in% dimnames(trajectories)[[3]]) {
       
-      current_timestamps <- trajectories[i,timestamps,1:nlogs[i]]
+      current_timestamps <- trajectories[i,1:current_nlogs,timestamps]
       
-      # If first timestamp > 0, add another with 0 to indicate phase without movement
-      if (current_timestamps[1] > 0) {
-        current_timestamps <- c(0, current_timestamps)
-        current_dim1 <- c(current_dim1[1], current_dim1)
-        current_dim2 <- c(current_dim2[1], current_dim2)
-        current_dev_ideal <- c(current_dev_ideal[1], current_dev_ideal)
-        nlogs[i] <- nlogs[i] + 1
-      }
-
-      measures[i,"RT"] <- max(current_timestamps)
+      measures[i,"RT"] <- current_timestamps[current_nlogs]
       
       # Calculate variables for phases with and without movement
       time_diffs <- diff(current_timestamps)
@@ -342,20 +371,51 @@ mt_measures <- function(
 
       if (all(pos_constant == FALSE)) {
         # Continuous movement
-        measures[i,"initiation_time"] <- 0
-        measures[i,"idle_time"] <- 0
+        measures[i,"initiation_time"] <- current_timestamps[1]
+        measures[i,"idle_time"] <- current_timestamps[1]
+        if (!is.null(hover_threshold)){
+          measures[i,"hover_time"] <- ifelse(current_timestamps[1]>hover_threshold,current_timestamps[1],0)
+          measures[i,"hovers"] <- 0
+        }
+        
       } else if (all(pos_constant == TRUE)) {
         # No movement at all
         measures[i,"initiation_time"] <- measures[i,"RT"]
         measures[i,"idle_time"] <- measures[i,"RT"]
+        if (!is.null(hover_threshold)){
+          measures[i,"hover_time"] <- ifelse(measures[i,"RT"]>hover_threshold,measures[i,"RT"],0)
+          measures[i,"hovers"] <- ifelse(measures[i,"RT"]>hover_threshold,1,0)
+        }
+        
       } else {
         # Intermittent movement
         measures[i,"initiation_time"] <- ifelse(
           !pos_constant[1],
-          0,
-          sum(time_diffs[1:(which(pos_constant == FALSE)[1]-1)])
+          current_timestamps[1],
+          current_timestamps[1]+sum(time_diffs[1:(which(pos_constant == FALSE)[1]-1)])
         )
         measures[i,"idle_time"] <- sum(time_diffs[pos_constant])
+        
+        
+        if (!is.null(hover_threshold)){
+          # Calculate hovers
+          
+          # Set time diffs for periods with movement to 0
+          time_diffs[!pos_constant] <- 0
+          
+          # Retrieve for each period without movement the last cumulated timestamp
+          time_diffs <- cumsum(time_diffs)[c(diff(pos_constant)==(-1),pos_constant[length(pos_constant)])]
+          
+          # Calculate the duration for each period as the difference of timestamps
+          if(length(time_diffs)>1) {
+            time_diffs <- c(time_diffs[1],diff(time_diffs))
+          }
+          
+          # Calculate number of periods without movement that exceed the threshold and their total time
+          measures[i,"hover_time"] <-  sum(time_diffs[time_diffs>hover_threshold])
+          measures[i,"hovers"] <-  sum(time_diffs>hover_threshold)
+        }
+      
       }
       
       # notes: timestamps (e.g., for MAD) always correspond
@@ -367,42 +427,42 @@ mt_measures <- function(
     }
     
     # Compute total distance covered
-    if (dist %in% dimnames(trajectories)[[2]]) {
-      measures[i,"total_dist"] <- sum(abs(trajectories[i,dist,]), na.rm=TRUE)
+    if (dist %in% dimnames(trajectories)[[3]]) {
+      measures[i,"total_dist"] <- sum(abs(trajectories[i,,dist]), na.rm=TRUE)
     }
     
     # Velocity-based measures
-    if (vel %in% dimnames(trajectories)[[2]] & timestamps %in% dimnames(trajectories)[[2]]) {
+    if (vel %in% dimnames(trajectories)[[3]] & timestamps %in% dimnames(trajectories)[[3]]) {
 
       # Maximum velocity
-      measures[i,"vel_max"] <- max(trajectories[i,vel,], na.rm=TRUE)
-      vel_max_pos <- which.max(trajectories[i,vel,])
+      measures[i,"vel_max"] <- max(trajectories[i,,vel], na.rm=TRUE)
+      vel_max_pos <- which.max(trajectories[i,,vel])
       
       # Interpolate timestamp of maximum velocity
       # (see mt_derivatives for logic of velocity timestamps)
       vel_max_pos <- ifelse(vel_max_pos==1, 1, c(vel_max_pos-1, vel_max_pos))
-      measures[i,"vel_max_time"] <- mean(trajectories[i,timestamps,vel_max_pos])
+      measures[i,"vel_max_time"] <- mean(trajectories[i,vel_max_pos,timestamps])
       
       # Minimum velocity (which is treated analogously)
-      measures[i,"vel_min"] <- min(trajectories[i,vel,], na.rm=TRUE)
-      vel_min_pos <- which.min(trajectories[i,vel,])
+      measures[i,"vel_min"] <- min(trajectories[i,,vel], na.rm=TRUE)
+      vel_min_pos <- which.min(trajectories[i,,vel])
       
       # average timestamps (see mt_derivatives for logic of velocity timestamps)
       vel_min_pos <- ifelse(
         vel_min_pos == 1,
         1, c(vel_min_pos-1, vel_min_pos)
       )
-      measures[i,"vel_min_time"] <- mean(trajectories[i,timestamps,vel_min_pos])
+      measures[i,"vel_min_time"] <- mean(trajectories[i,vel_min_pos,timestamps])
     }
 
-    if (acc %in% dimnames(trajectories)[[2]] & timestamps %in% dimnames(trajectories)[[2]]) {
+    if (acc %in% dimnames(trajectories)[[3]] & timestamps %in% dimnames(trajectories)[[3]]) {
       # Maximum acceleration
-      measures[i,"acc_max"] <- max(trajectories[i,acc,], na.rm=TRUE)
-      measures[i,"acc_max_time"] <- trajectories[i,timestamps,which.max(trajectories[i,acc,])]
+      measures[i,"acc_max"] <- max(trajectories[i,,acc], na.rm=TRUE)
+      measures[i,"acc_max_time"] <- trajectories[i,which.max(trajectories[i,,acc]),timestamps]
       
       # Minimum acceleration
-      measures[i,"acc_min"] <- min(trajectories[i,acc,], na.rm=TRUE)
-      measures[i,"acc_min_time"] <- trajectories[i,timestamps,which.min(trajectories[i,acc,])]
+      measures[i,"acc_min"] <- min(trajectories[i,,acc], na.rm=TRUE)
+      measures[i,"acc_min_time"] <- trajectories[i,which.min(trajectories[i,,acc]),timestamps]
     }
 
     if (verbose & i %% 100 == 0) {
@@ -417,28 +477,5 @@ mt_measures <- function(
   return(create_results(
     data=data, results=measures, use=use, save_as=save_as,
     ids=rownames(trajectories), overwrite=TRUE))
-  
-}
-
-
-#' @describeIn mt_measures Deprecated
-#' @export
-mt_calculate_measures <- function(
-  data,
-  use="trajectories", save_as="measures",
-  dimensions=c("xpos","ypos"), timestamps="timestamps",
-  flip_threshold=0,
-  verbose=FALSE,show_progress=NULL) {
-  
-  .Deprecated("mt_measures")
-  
-  return(
-    mt_measures(
-      data=data,use=use,save_as=save_as,
-      dimensions=dimensions,timestamps=timestamps,
-      flip_threshold=flip_threshold,
-      verbose=verbose,show_progress=show_progress
-    )
-  )
   
 }

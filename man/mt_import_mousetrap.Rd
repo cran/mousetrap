@@ -2,13 +2,11 @@
 % Please edit documentation in R/import.R
 \name{mt_import_mousetrap}
 \alias{mt_import_mousetrap}
-\title{Import mouse-tracking data recorded using the mousetrap plug-ins in
-OpenSesame.}
+\title{Import mouse-tracking data recorded using the mousetrap plug-ins in OpenSesame.}
 \usage{
 mt_import_mousetrap(raw_data, xpos_label = "xpos", ypos_label = "ypos",
   timestamps_label = "timestamps", mt_id_label = NULL, split = ",",
-  duplicates = "remove_first", reset_timestamps = TRUE, verbose = FALSE,
-  show_progress = NULL)
+  duplicates = "remove_first", reset_timestamps = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{raw_data}{a data.frame containing the raw data.}
@@ -43,8 +41,6 @@ is recommended for all following analyses in mousetrap.}
 
 \item{verbose}{logical indicating whether function should report its
 progress.}
-
-\item{show_progress}{Deprecated. Please use \code{verbose} instead.}
 }
 \value{
 A mousetrap data object (see \link{mt_example}).
@@ -53,16 +49,15 @@ A mousetrap data object (see \link{mt_example}).
   OpenSesame, the unit of the timestamps is milliseconds.
 }
 \description{
-\code{mt_import_mousetrap} accepts a data.frame of (merged) raw data from a
-mouse-tracking experiment implemented in OpenSesame using the
-\href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin}. From
-this data.frame, \code{mt_import_mousetrap} creates a mousetrap data object
-containing the trajectories and additional data for further processing within
-the mousetrap package. Specifically, it returns a list that includes the
-trajectory data as an array (called \code{trajectories}), and all other data
-as a data.frame (called \code{data}). This data structure can then be passed
-on to other functions within this package (see \link{mousetrap} for an
-overview).
+\code{mt_import_mousetrap} accepts a data.frame of (merged) raw data from a 
+mouse-tracking experiment implemented in OpenSesame using the mousetrap 
+plugin (Kieslich & Henninger, 2017). From this data.frame,
+\code{mt_import_mousetrap} creates a mousetrap data object containing the
+trajectories and additional data for further processing within the mousetrap
+package. Specifically, it returns a list that includes the trajectory data as
+an array (called \code{trajectories}), and all other data as a data.frame
+(called \code{data}). This data structure can then be passed on to other
+functions within this package (see \link{mousetrap} for an overview).
 }
 \details{
 When working with mouse-tracking data that were recorded using the mousetrap
@@ -100,8 +95,12 @@ mt_data <- mt_import_mousetrap(mt_example_raw)
 
 }
 \references{
-Mousetrap plug-ins for OpenSesame
-  (\url{https://github.com/pascalkieslich/mousetrap-os})
+Kieslich, P. J., & Henninger, F. (2016). Mousetrap: 
+  Mouse-tracking plugins for OpenSesame (Version 1.2.1). doi: 
+  \url{https://doi.org/10.5281/zenodo.163404}
+  
+  Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An integrated, 
+  open-source mouse-tracking package. Manuscript submitted for publication.
 }
 \seealso{
 \link[readbulk]{read_opensesame} from the \code{readbulk} library
@@ -111,4 +110,8 @@ Mousetrap plug-ins for OpenSesame
 \link{mt_import_wide} and \link{mt_import_long} for importing mouse-tracking
 data from other sources.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}

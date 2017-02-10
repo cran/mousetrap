@@ -118,4 +118,8 @@ coefficient.
 
 \link[diptest]{dip.test} for more information about Hartigan's dip test.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}

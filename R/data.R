@@ -1,8 +1,8 @@
 #' Raw mouse-tracking dataset for demonstrations of the mousetrap package
 #'
-#' An exemplary mouse-tracking dataset collected in OpenSesame using the
-#' mousetrap plug-ins. A preprocessed (as opposed to raw) version of the same
-#' data can be found in \link{mt_example}.
+#' An exemplary mouse-tracking dataset collected in OpenSesame using the 
+#' mousetrap plugin (Kieslich & Henninger, 2017). A preprocessed (as opposed to
+#' raw) version of the same data can be found in \link{mt_example}.
 #'
 #' The data stem from a study based on experiment 1 by Dale et al. (2007). In
 #' this experiment, participants have to assign exemplars (e.g., "shark") to one
@@ -24,11 +24,12 @@
 #' @references Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
 #'   responses in the time course of categorizing atypical exemplars.
 #'   \emph{Memory & Cognition, 35}(1), 15-28.
-#'   
-#'   Mousetrap
 #'
-#' @format A \link{data.frame} with 38 rows and 19 variables. The data.frame is 
-#'   based on the combined raw data that were created using 
+#'   Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An integrated, 
+#'   open-source mouse-tracking package. Manuscript submitted for publication.
+#'
+#' @format A \link{data.frame} with 38 rows and 19 variables. The data.frame is
+#'   based on the combined raw data that were created using
 #'   \link[readbulk]{read_opensesame} from the \code{readbulk} library. For ease
 #'   of use, unnecessary columns were excluded.
 #'
@@ -54,11 +55,11 @@
 
 #' A mousetrap data object.
 #'
-#' A mousetrap data object with example data created by importing
+#' A data object of class "mousetrap" with example data created by importing 
 #' \link{mt_example_raw} and applying basic post-processing.
 #'
-#' The raw data set was imported using \link{mt_import_mousetrap}. Trajectories 
-#' were then remapped using \link{mt_remap_symmetric} so that all trajectories 
+#' The raw data set was imported using \link{mt_import_mousetrap}. Trajectories
+#' were then remapped using \link{mt_remap_symmetric} so that all trajectories
 #' end in the top-left corner and their starting point was aligned using
 #' \link{mt_align_start} to a common value (0,0).
 #'
@@ -70,16 +71,16 @@
 #'     information about the content of the trial data in \code{mt_example} can 
 #'     be found in \link{mt_example_raw}. The \link{rownames} of \code{data} 
 #'     correspond to the trial identifier. For convenience, the trial identifier
-#'     is also stored in an additional column called "mt_id".}
+#'     is also stored in an additional column called "mt_id".} 
 #'     \item{\code{trajectories}: an \link{array} containing the raw 
 #'     mouse-tracking trajectories. The first dimension represents the different
-#'     trials and the dimension names (which can be assessed using 
+#'     trials and the dimension names (which can be accessed using 
 #'     \link{rownames}) correspond to the trial identifier (the same identifier 
 #'     that is used as the \code{rownames} in \code{data}). The second dimension
-#'     corresponds to the different mouse-tracking variables (timestamps, 
-#'     x-positions, y-positions) which are usually called \code{timestamps}, 
-#'     \code{xpos}, and \code{ypos}. The third dimension corresponds to the 
-#'     samples taken over time which are included in chronological order.}
+#'     corresponds to the samples taken over time which are included in
+#'     chronological order. The third dimension corresponds to the different
+#'     mouse-tracking variables (timestamps, x-positions, y-positions) which are
+#'     usually called \code{timestamps}, \code{xpos}, and \code{ypos}. }
 #'   }
 #'
 #'   Some functions in this package (e.g., \link{mt_time_normalize} and
@@ -91,3 +92,28 @@
 #'   additional data.frame with mouse-tracking measures to it.
 #'
 "mt_example"
+
+#' Mouse trajectory prototypes.
+#'
+#' A core set of five mouse trajectory prototypes including the 'straight'
+#' trajectory, the mildly curved trajectory, the continuous change-of-mind
+#' trajectory, the discrete change-of-mind trajectory, and the double discrete
+#' change-of-mind trajectory.
+#' 
+#' Mouse- and hand-trajectories often occur in types (Wulff, Haslbeck, & 
+#' Schulte-Mecklenbeck, 2017). In such cases, movement trajectory data should be
+#' analyzed in terms of discrete type assignments. To this end \link{mt_map} can
+#' be used to map mouse- or hand-trajectory to the closest of several predefined
+#' prototypes. \code{mt_prototypes} provides a core set of prototypes that has 
+#' been shown to represent well a large fraction of empirical movement 
+#' trajectories.
+#' 
+#' To tailor the set of prototypes to a given study, \code{mt_prototypes} can be
+#' extended using \link{mt_add_trajectory}.
+#' 
+#' @references Wulff, D. U., Haslbeck, J. M. B., Schulte-Mecklenbeck, M. (2017).
+#'   Measuring the (dis-)continuous mind. Manuscript in preparation.
+#'
+"mt_prototypes"
+NULL
+

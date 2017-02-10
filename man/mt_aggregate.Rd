@@ -9,7 +9,8 @@ mt_aggregate(data, use = "measures", use_variables = NULL, use2 = "data",
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory
+array can be provided directly (in this case \code{use} will be ignored).}
 
 \item{use}{a character string specifying which dataset should be aggregated.
 The corresponding data are selected from \code{data} using
@@ -97,4 +98,8 @@ trajectories per subject.
 \link[dplyr]{summarize_at} for aggregating data using the \code{dplyr}
 package.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}

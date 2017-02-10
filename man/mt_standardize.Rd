@@ -55,10 +55,15 @@ mt_example <- mt_standardize(mt_example,
   use_variables=c("MAD", "AD"),
   within=c("subject_nr", "Condition"),
   prefix="z_")
+  
 }
 \seealso{
 \link{scale_within} which is called by \code{mt_standardize}.
 
 \link{scale} for the R base scale function.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}

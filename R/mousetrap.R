@@ -1,57 +1,92 @@
-#' mousetrap: Process and Analyze Mouse-Tracking Data
+#' Process and analyze mouse-tracking data
 #' 
 #' The mousetrap package provides functions for importing, preprocessing, 
 #' analyzing, aggregating, and visualizing mouse-tracking data. In the 
 #' following, a brief overview of the functions in this package is given.
 #' 
+#' @section Read functions:
+#'   
+#'   Depending on the file format, one of the standard R functions for reading 
+#'   files into R can be used (e.g., \link[utils]{read.table} or 
+#'   \link[utils]{read.csv}).
+#'   
+#'   If raw data were collected using MouseTracker, the mousetrap package 
+#'   provides the \link{read_mt} function to read files in the ".mt" format.
+#'   
+#'   If several raw data files should be read and merged, the 
+#'   \link[readbulk]{read_bulk} function from the readbulk package can be used
+#'   (or the \link[readbulk]{read_opensesame} function, if data were collected
+#'   using OpenSesame).
+#'   
 #' @section Import functions:
 #'   
-#'   The first step is to create a mousetrap data object. Depending on the input
-#'   format, one of the following functions can be used. A detailed description
-#'   (and example) of the resulting mousetrap data object can be found in
-#'   \link{mt_example}.
+#'   The initial step to prepare data for analysis in the mousetrap package is
+#'   to create a mousetrap data object. Depending on the input format, one of
+#'   the following functions can be used. A detailed description (and example)
+#'   of the resulting mousetrap data object can be found in \link{mt_example}.
 #'   
 #'   \link{mt_import_mousetrap} imports mouse-tracking data that were recorded
-#'   using the \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap
-#'   plug-ins} for OpenSesame.
+#'   using the mousetrap plugin for OpenSesame.
 #'   
 #'   \link{mt_import_wide} imports mouse-tracking data saved in a wide format 
-#'   (e.g., data exported from MouseTracker).
+#'   (e.g., data collected using MouseTracker).
 #'   
 #'   \link{mt_import_long} imports mouse-tracking data saved in a long format. 
-#'   (e.g., trajectories exported using the mt_reshape function from this 
-#'   package).
+#'   (e.g., trajectories exported using \link{mt_export_long}).
 #'   
-#' @section Preprocessing functions:
-#'   
-#'   A number of functions are available that perform preprocessing operations 
-#'   typically used before analyzing mouse-tracking data.
-#'   
+#' @section Geometric preprocessing functions:
+#' 
+#'   A number of functions are available that perform geometric preprocessing 
+#'   operations.
+#' 
 #'   \link{mt_remap_symmetric} remaps mouse trajectories to one side (or one
 #'   quadrant) of the coordinate system.
+#'   
+#'   \link{mt_align} is a general purpose function for aligning and rescaling 
+#'   trajectories. For specific operations, you can rely on one of the
+#'   following functions.
+#'   
+#'   \link{mt_align_start} aligns the start position of trajectories.
+#'   
+#'   \link{mt_align_start_end} aligns all trajectories so that they share a 
+#'   common initial and final coordinate (this is also sometimes referred to as 
+#'   "space-normalization").
+#'   
+#' @section Resampling and interpolation functions:
+#'   
+#'   A number of functions are available that perform resampling and 
+#'   interpolation operations.
 #'   
 #'   \link{mt_exclude_initiation}	excludes the initial phase of a trial without 
 #'   mouse movement.
 #'   
-#'   \link{mt_align_start} aligns the start position of trajectories.
+#'   \link{mt_time_normalize}	performs time-normalization using equidistant time
+#'   intervals, resulting in an identical number of samples for all 
+#'   trajectories.
 #'   
-#'   \link{mt_space_normalize} performs space-normalization by remapping all
-#'   trajectories so that they share a common initial and final coordinate.
+#'   \link{mt_resample}	resamples trajectories so that samples occur at constant
+#'   intervals of a specified length.
 #'   
-#'   \link{mt_time_normalize}	performs time-normalization, resulting in an
-#'   identical number of samples for all trajectories.
+#'   \link{mt_average} averages trajectory coordinates (and related variables)
+#'   for time bins of constant duration.
 #'   
-#'   \link{mt_resample}	resamples trajectories such that samples occur at
-#'   constant intervals of a specified length.
+#'   \link{mt_spatialize} re-represents each trajectory spatially so that
+#'   adjacent points on the trajectory become equidistant to each other.
 #'   
-#'   \link{mt_average} averages trajectory coordinates for time bins of constant
-#'   duration.
+#' @section Data handling functions:
 #'   
-#'   \link{mt_subset}	filters mouse-tracking data by trials, such that are only
-#'   those meeting defined criteria are included.
+#'   A number of functions are available for data handling operations, such as
+#'   filtering or adding of new variables or trajectories.
+#'   
+#'   \link{mt_subset}	filters mouse-tracking data by trials, so that only those 
+#'   meeting the defined criteria are included.
 #'   
 #'   \link{mt_add_variables} adds new, self created variables to a trajectory 
 #'   array.
+#'   
+#'   \link{mt_add_trajectory} adds a new trajectory to a trajectory array.
+#'   
+#'   \link{mt_bind} joins two trajectory arrays.
 #'   
 #' @section Analysis functions:
 #'   
@@ -62,6 +97,8 @@
 #'   \link{mt_derivatives} calculates distance, velocity, and 
 #'   acceleration for trajectories.
 #'   
+#'   \link{mt_angles} calculates movement angles for trajectories.
+#'   
 #'   \link{mt_deviations} calculates the deviations from an idealized
 #'   trajectory (straight line).
 #'   
@@ -69,17 +106,33 @@
 #'   
 #'   \link{mt_sample_entropy}	calculates sample entropy.
 #'   
-#'   \link{mt_movement_angle}	calculates the initial movement angle.
-#'   
 #'   \link{mt_standardize} standardizes mouse-tracking measures onto a common 
-#'   scale (individually for subsets of the data, e.g. z-scaled data per
-#'   participant).
+#'   scale (separately for subsets of the data, e.g., per participant).
 #'   
 #'   \link{mt_check_bimodality}	assesses the bimodality of mouse-tracking
 #'   measure distributions.
 #'   
 #'   \link{mt_check_resolution}	checks the (temporal) logging resolution of raw
 #'   trajectories.
+#'   
+#'   \link{mt_count} counts the number of observations for each trajectory.
+#'   
+#' @section Cluster functions:
+#'   
+#'   A number of different functions for clustering trajectories is provided.
+#'   
+#'   \link{mt_distmat} computes the distance matrix for each pair of 
+#'   trajectories.
+#'   
+#'   \link{mt_cluster} performs trajectory clustering with a specified number of
+#'   clusters.
+#'   
+#'   \link{mt_cluster_k} estimates the optimal number of clusters using various 
+#'   methods.
+#'   
+#'   \link{mt_map} maps trajectories onto a predefined set of prototype 
+#'   trajectories (a core set is provided in \link{mt_prototypes}).
+#'   
 #'   
 #' @section Reshaping, aggregation, and export functions:
 #'   
@@ -107,13 +160,13 @@
 #'   
 #'   \link{mt_plot_aggregate}	plots aggregated trajectory data.
 #'   
-#'   \link{mt_plot_per_trajectory} creates a pdf with separate plots per 
-#'   trajectory.
-#'   
 #'   \link{mt_plot_add_rect} adds rectangles to a trajectory plot.
 #'   
 #'   \link{mt_plot_riverbed} plots the relative frequency of a selected variable
 #'   across time.
+#'   
+#'   \link{mt_plot_per_trajectory} creates a pdf with separate plots per 
+#'   trajectory.
 #'   
 #' @section Helper functions:
 #'   
@@ -121,8 +174,6 @@
 #'   
 #'   \link{scale_within} scales and centers variables within the levels of 
 #'   another variable.
-#'   
-#'   \link{read_mousetracker} reads data that was exported from MouseTracker.
 #'   
 #'   
 #' @examples
@@ -134,7 +185,7 @@
 #' mt_example <- mt_deviations(mt_example)
 #' mt_example <- mt_measures(mt_example)
 #' 
-#' average_measures <- mt_aggregate(
+#' mt_aggregate(
 #'   mt_example, use="measures",
 #'   use_variables=c("MAD", "AD"),
 #'   use2_variables="Condition"

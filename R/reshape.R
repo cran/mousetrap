@@ -38,7 +38,8 @@
 #'
 #'
 #' @param data a mousetrap data object created using one of the mt_import
-#'   functions (see \link{mt_example} for details).
+#'   functions (see \link{mt_example} for details). Alternatively, a trajectory
+#'   array can be provided directly (in this case \code{use} will be ignored).
 #' @param use a character string specifying which data should be reshaped. The
 #'   corresponding data are selected from data using \code{data[[use]]}.
 #'   Usually, this value corresponds to either "trajectories",
@@ -139,6 +140,11 @@
 #'   trajectories_long = FALSE
 #'   )
 #'
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_reshape <- function(data,
   use="trajectories", use_variables=NULL,
@@ -162,6 +168,23 @@ mt_reshape <- function(data,
     )
     .funs <- aggregation_function
   }
+  
+  
+  # If data is not a mousetrap object, create one
+  # (this allows that trajectories can be reshaped directly)
+  if(is_mousetrap_data(data)==FALSE){
+    
+    if(class(use2) %in% c("NULL","character")) {
+      data_use2 <- data.frame(mt_id=rownames(data),row.names = rownames(data))
+    } else {
+      data_use2 <- use2
+    }
+    use <- "trajectories"
+    use2 <- "use2"
+    data <- list(use2=data_use2,
+                 trajectories=data)
+    class(data) <- "mousetrap"
+  }
 
   # Assume trajectories are provided in case class is an array
   type_trajectories <- (class(data[[use]]) == "array")
@@ -170,15 +193,15 @@ mt_reshape <- function(data,
   if (type_trajectories) {
 
     # Extract trajectory data
-    dataset <- extract_data(data=data,use=use)
+    dataset <- extract_data(data=data, use=use)
 
     # Select all variables if use_variables is not specified
     if (is.null(use_variables)) {
-      use_variables <- dimnames(dataset)[[2]]
+      use_variables <- dimnames(dataset)[[3]]
 
     # Otherwise select relevant dimensions
     } else{
-      dataset <- dataset[,use_variables,,drop=FALSE]
+      dataset <- dataset[,,use_variables,drop=FALSE]
     }
 
     # Get dim variables
@@ -186,17 +209,17 @@ mt_reshape <- function(data,
     dim_names <- dimnames(dataset)
 
     # Reshape array into long format
-    dataset <- aperm(dataset, c(3, 1, 2))
-    dim(dataset) <- c(dim_count[1] * dim_count[3], dim_count[2])
+    dataset <- aperm(dataset, c(2, 1, 3))
+    dim(dataset) <- c(dim_count[1] * dim_count[2], dim_count[3])
 
     # Create data.frame adding mt_id and mt_seq columns
     dataset <- data.frame(
-      rep(dim_names[[1]], each=dim_count[3]),  #mt_id
-      rep(1:dim_count[3], times=dim_count[1]), #mt_seq
+      rep(dim_names[[1]], each=dim_count[2]),  #mt_id
+      rep(1:dim_count[2], times=dim_count[1]), #mt_seq
       dataset,
       stringsAsFactors=FALSE
     )
-    colnames(dataset) <- c(mt_id, mt_seq, dim_names[[2]])
+    colnames(dataset) <- c(mt_id, mt_seq, dim_names[[3]])
 
     # Remove columns that only contain NAs
     dataset <- dataset[
@@ -316,7 +339,7 @@ mt_reshape <- function(data,
 
     dataset <- tidyr::gather_(dataset, key_col="key", value_col="val", gather_cols=use_variables)
     dataset <- tidyr::unite_(dataset, col="key", from=c("key", mt_seq), sep="_")
-    # convert to factor to insure correct column order
+    # convert to factor to ensure correct column order
     dataset$key <- factor(dataset$key, levels=unique(dataset$key))
     dataset <- tidyr::spread_(dataset, key_col="key", value_col="val")
 

@@ -13,7 +13,8 @@ mt_export_wide(data, use = "trajectories", use_variables = NULL,
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
-functions (see \link{mt_example} for details).}
+functions (see \link{mt_example} for details). Alternatively, a trajectory
+array can be provided directly (in this case \code{use} will be ignored).}
 
 \item{use}{a character string specifying which data should be exported. The 
 corresponding data are selected from data using \code{data[[use]]}. 
@@ -53,6 +54,7 @@ the trajectory data before export. \code{mt_export_long} and
 
 \item \code{mt_export_wide}: Export mouse-tracking data in wide format
 }}
+
 \examples{
 # Export data in long format
 # (and include information about condition and subject_nr)
@@ -72,4 +74,8 @@ format.
 \link{mt_import_wide} for importing mouse-tracking data saved in a wide
 format.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}

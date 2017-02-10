@@ -41,12 +41,13 @@
 #' @param acc_on_abs_vel logical indicating if acceleration should be calculated
 #'   based on absolute velocity values (ignoring direction). Only relevant if
 #'   velocity can be negative (see Details).
-#' @param dimension Deprecated. Please use \code{dimensions} instead.
+#' @param return_delta_time logical indicating if the timestamp differences 
+#'   should be returned as well (as "delta_time").
 #'
-#' @return A mousetrap data object (see \link{mt_example}) with Euclidian
-#'   distance, velocity, and acceleration added as additional columns to the
-#'   trajectory array (called \code{dist}, \code{vel}, and  \code{acc}, if no
-#'   prefix was specified). If the trajectory array was provided directly as
+#' @return A mousetrap data object (see \link{mt_example}) with Euclidian 
+#'   distance, velocity, and acceleration added as additional variables to the 
+#'   trajectory array (called \code{dist}, \code{vel}, and  \code{acc}, if no 
+#'   prefix was specified). If the trajectory array was provided directly as 
 #'   \code{data}, only the trajectory array will be returned.
 #'
 #' @seealso \link{mt_average} for averaging trajectories across constant time
@@ -65,63 +66,52 @@
 #' mt_example <- mt_derivatives(mt_example,
 #'   dimensions="xpos")
 #'
-#' @describeIn mt_derivatives Calculate distance, velocity, and acceleration
+#' @author
+#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' 
+#' Felix Henninger
+#' 
 #' @export
 mt_derivatives <- function(
   data,
   use="trajectories", save_as=use,
   dimensions=c("xpos","ypos"), timestamps="timestamps",
-  prefix="", acc_on_abs_vel=FALSE,
-  verbose=FALSE,
-  show_progress=NULL, dimension=NULL) {
-
-  if(is.null(show_progress) == FALSE) {
-    warning(
-      "The argument show_progress is deprecated. ",
-      "Please use verbose instead.",
-      call. = FALSE
-    )
-    verbose <- show_progress
-  }
-
-  if (is.null(dimension) == FALSE) {
-    warning(
-      "The argument dimension is deprecated. ",
-      "Please use dimensions instead.",
-      call. = FALSE
-    )
-    dimensions <- ifelse(
-      dimension == "xypos",
-      c("xpos","ypos"),
-      dimension
-      )
-  }
-
+  prefix="",
+  acc_on_abs_vel=FALSE, return_delta_time=FALSE,
+  verbose=FALSE) {
+  
+  
   # Extract trajectories and create labels
   trajectories <- extract_data(data=data, use=use)
   dist <- paste0(prefix, "dist")
   vel  <- paste0(prefix, "vel")
   acc  <- paste0(prefix, "acc")
+  delta_time <-  paste0(prefix, "delta_time")
 
   # Create new array with added columns for the new variables
   derivatives <- mt_add_variables(trajectories,
     variables=c(dist,vel,acc))
+  
+  if (return_delta_time){
+    derivatives <- mt_add_variables(derivatives,
+                                    variables=c(delta_time))
+  }
 
   # Calculate derivatives
   for (i in 1:nrow(trajectories)) {
 
     # Compute deltas for timestamps
-    delta_timestamps <- diff(derivatives[i,timestamps,])
+    delta_timestamps <- diff(derivatives[i,,timestamps])
 
     # Compute distance depending on the number of dimensions
 
     # For one dimension, simply compute the distance
     if (length(dimensions) == 1) {
-      distances <- diff(derivatives[i,dimensions,])
+      distances <- diff(derivatives[i,,dimensions])
 
     # For more than one dimension, compute Eucledian distance between measurements
     } else {
-      distances <- sqrt(rowSums(diff(t(derivatives[i,dimensions,]))^2))
+      distances <- sqrt(rowSums(diff(derivatives[i,,dimensions])^2))
     }
 
     # Compute velocity based on distance and time deltas
@@ -138,9 +128,13 @@ mt_derivatives <- function(
     accelerations <- c(accelerations, NA)
 
     # Add derivatives to array (adding a ceiling so they have the same length)
-    derivatives[i,dist,] <- c(0, distances)
-    derivatives[i,vel,] <- c(0, velocities)
-    derivatives[i,acc,] <- c(0, accelerations)
+    derivatives[i,,dist] <- c(0, distances)
+    derivatives[i,,vel] <- c(0, velocities)
+    derivatives[i,,acc] <- c(0, accelerations)
+    
+    if (return_delta_time){
+      derivatives[i,,delta_time] <- c(0, delta_timestamps)
+    }
 
     if (verbose) {
       if (i %% 100 == 0) message(paste(i, "trials finished"))
@@ -155,28 +149,4 @@ mt_derivatives <- function(
     data=data, results=derivatives,
     use=use, save_as=save_as
   ))
-}
-
-
-#' @describeIn mt_derivatives Deprecated
-#' @export
-mt_calculate_derivatives <- function(
-  data,
-  use="trajectories", save_as=use,
-  dimensions=c("xpos", "ypos"), timestamps="timestamps",
-  prefix="", acc_on_abs_vel=FALSE,
-  verbose=FALSE,
-  show_progress=NULL, dimension=NULL) {
-
-  .Deprecated("mt_derivatives")
-
-  return(
-    mt_derivatives(
-      data=data,use=use, save_as=save_as,
-      dimensions=dimensions, timestamps=timestamps,
-      prefix=prefix, acc_on_abs_vel=acc_on_abs_vel,
-      verbose=verbose, show_progress=show_progress,
-      dimension=dimension
-    )
-  )
 }

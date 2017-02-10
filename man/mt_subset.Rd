@@ -59,4 +59,8 @@ or data.frames.
 \link{mt_reshape} for information about the subset argument in various other
 mousetrap functions.
 }
+\author{
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 
+Felix Henninger
+}
