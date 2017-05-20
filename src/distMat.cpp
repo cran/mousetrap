@@ -43,10 +43,12 @@ NumericMatrix distMat(NumericMatrix x,
   return dist;
   }
 
+
+
 // [[Rcpp::export]]
 NumericMatrix distMatV(NumericMatrix x,
-                      NumericMatrix y,
-                      int power = 2) {
+                       NumericMatrix y,                       
+                       int power = 2) {
   int ni = x.ncol(), nt = x.nrow();
   double xd,yd,d = 0;
   NumericMatrix dist(nt,nt);
@@ -90,9 +92,9 @@ NumericMatrix distMatV(NumericMatrix x,
 
 // [[Rcpp::export]]
 NumericMatrix distMat3d(NumericMatrix x,
-                         NumericMatrix y,
-                         NumericMatrix z,
-                         int power = 2) {
+                        NumericMatrix y,
+                        NumericMatrix z,  
+                        int power = 2) {
   int ni = x.ncol(), nt = x.nrow();
   double xd,yd,zd,d = 0;
   NumericMatrix dist(nt,nt);
@@ -135,9 +137,9 @@ NumericMatrix distMat3d(NumericMatrix x,
 
 // [[Rcpp::export]]
 NumericMatrix distMat3dV(NumericMatrix x,
-                       NumericMatrix y,
-                       NumericMatrix z,
-                       int power = 2) {
+                         NumericMatrix y,
+                         NumericMatrix z,  
+                         int power = 2) {
   int ni = x.ncol(), nt = x.nrow();
   double xd,yd,zd,d = 0;
   NumericMatrix dist(nt,nt);

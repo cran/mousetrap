@@ -4,10 +4,11 @@
 \name{mt_example_raw}
 \alias{mt_example_raw}
 \title{Raw mouse-tracking dataset for demonstrations of the mousetrap package}
-\format{A \link{data.frame} with 38 rows and 19 variables. The data.frame is
-  based on the combined raw data that were created using
-  \link[readbulk]{read_opensesame} from the \code{readbulk} library. For ease
-  of use, unnecessary columns were excluded.
+\format{A \link{data.frame} with 38 rows and 19 variables. The data.frame is 
+  based on the combined raw data that were created using 
+  \link[readbulk]{read_opensesame} from the 
+  \href{http://pascalkieslich.github.io/readbulk/}{readbulk} library. For 
+  ease of use, unnecessary columns were excluded.
 
   The variables included relate to the item that was presented
   (\code{Exemplar}), the answer categories (\code{Category1} and
@@ -30,9 +31,11 @@
 mt_example_raw
 }
 \description{
-An exemplary mouse-tracking dataset collected in OpenSesame using the 
-mousetrap plugin (Kieslich & Henninger, 2017). A preprocessed (as opposed to
-raw) version of the same data can be found in \link{mt_example}.
+An exemplary mouse-tracking dataset collected 
+\href{http://osdoc.cogsci.nl/}{OpenSesame} using the 
+\href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin} 
+(Kieslich & Henninger, in press). A preprocessed (as opposed to raw) version of
+the same data can be found in \link{mt_example}.
 }
 \details{
 The data stem from a study based on experiment 1 by Dale et al. (2007). In
@@ -53,11 +56,12 @@ Please note that \code{mt_example_raw} should only be used for exploring the
 features of the mousetrap package and not for any substantive analysis.
 }
 \references{
-Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
-  responses in the time course of categorizing atypical exemplars.
-  \emph{Memory & Cognition, 35}(1), 15-28.
-
-  Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An integrated, 
-  open-source mouse-tracking package. Manuscript submitted for publication.
+Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor 
+ responses in the time course of categorizing atypical exemplars. 
+ \emph{Memory & Cognition, 35}(1), 15-28.
+ 
+ Kieslich, P. J., & Henninger, F. (in press). Mousetrap: An integrated,
+ open-source mouse-tracking package. \emph{Behavior Research Methods}.
+ doi:10.3758/s13428-017-0900-z
 }
 \keyword{datasets}

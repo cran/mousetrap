@@ -10,13 +10,15 @@
 #'   files into R can be used (e.g., \link[utils]{read.table} or 
 #'   \link[utils]{read.csv}).
 #'   
-#'   If raw data were collected using MouseTracker, the mousetrap package 
+#'   If raw data were collected using
+#'   \href{http://www.mousetracker.org/}{MouseTracker}, the mousetrap package 
 #'   provides the \link{read_mt} function to read files in the ".mt" format.
 #'   
 #'   If several raw data files should be read and merged, the 
-#'   \link[readbulk]{read_bulk} function from the readbulk package can be used
-#'   (or the \link[readbulk]{read_opensesame} function, if data were collected
-#'   using OpenSesame).
+#'   \link[readbulk]{read_bulk} function from the 
+#'   \href{http://pascalkieslich.github.io/readbulk/}{readbulk} package can be
+#'   used (or the \link[readbulk]{read_opensesame} function, if data were 
+#'   collected using \href{http://osdoc.cogsci.nl/}{OpenSesame}).
 #'   
 #' @section Import functions:
 #'   
@@ -25,11 +27,13 @@
 #'   the following functions can be used. A detailed description (and example)
 #'   of the resulting mousetrap data object can be found in \link{mt_example}.
 #'   
-#'   \link{mt_import_mousetrap} imports mouse-tracking data that were recorded
-#'   using the mousetrap plugin for OpenSesame.
+#'   \link{mt_import_mousetrap} imports mouse-tracking data that were recorded 
+#'   using the \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap
+#'   plugin} for \href{http://osdoc.cogsci.nl/}{OpenSesame}.
 #'   
 #'   \link{mt_import_wide} imports mouse-tracking data saved in a wide format 
-#'   (e.g., data collected using MouseTracker).
+#'   (e.g., data collected using
+#'   \href{http://www.mousetracker.org/}{MouseTracker}).
 #'   
 #'   \link{mt_import_long} imports mouse-tracking data saved in a long format. 
 #'   (e.g., trajectories exported using \link{mt_export_long}).
@@ -109,6 +113,9 @@
 #'   \link{mt_standardize} standardizes mouse-tracking measures onto a common 
 #'   scale (separately for subsets of the data, e.g., per participant).
 #'   
+#'   \link{mt_scale_trajectories} provides different options for standardizing
+#'   variables in a mouse trajectory array.
+#'   
 #'   \link{mt_check_bimodality}	assesses the bimodality of mouse-tracking
 #'   measure distributions.
 #'   
@@ -121,7 +128,7 @@
 #'   
 #'   A number of different functions for clustering trajectories is provided.
 #'   
-#'   \link{mt_distmat} computes the distance matrix for each pair of 
+#'   \link{mt_distmat} computes the dissimilarity/distance between each pair of 
 #'   trajectories.
 #'   
 #'   \link{mt_cluster} performs trajectory clustering with a specified number of
@@ -168,6 +175,13 @@
 #'   \link{mt_plot_per_trajectory} creates a pdf with separate plots per 
 #'   trajectory.
 #'   
+#'   \link{mt_heatmap} and \link{mt_heatmap_ggplot} plot trajectory heatmaps.
+#'   
+#'   \link{mt_diffmap} for creating a difference-heatmap of two trajectory 
+#'   heatmap images.
+#'   
+#'   \link{mt_animate} creates a gif trajectory animation.
+#'   
 #' @section Helper functions:
 #'   
 #'   \link{bimodality_coefficient} calculates the bimodality coefficient.
@@ -175,31 +189,38 @@
 #'   \link{scale_within} scales and centers variables within the levels of 
 #'   another variable.
 #'   
+#'   \link{bezier} creates Bezier-curves using the Bernstein approximation.
+#'   
 #'   
 #' @examples
-#' mt_example <- mt_import_mousetrap(mt_example_raw)
-#' mt_example <- mt_remap_symmetric(mt_example)
-#' mt_example <- mt_align_start(mt_example)
-#' mt_example <- mt_time_normalize(mt_example)
-#' mt_example <- mt_derivatives(mt_example)
-#' mt_example <- mt_deviations(mt_example)
-#' mt_example <- mt_measures(mt_example)
+#' \dontrun{
+#' KH2017 <- mt_import_mousetrap(subset(KH2017_raw,correct==1))
+#' KH2017 <- mt_remap_symmetric(KH2017)
+#' KH2017 <- mt_align_start(KH2017)
+#' }
+#' 
+#' KH2017 <- mt_time_normalize(KH2017)
+#' KH2017 <- mt_measures(KH2017)
 #' 
 #' mt_aggregate(
-#'   mt_example, use="measures",
+#'   KH2017, use="measures",
 #'   use_variables=c("MAD", "AD"),
-#'   use2_variables="Condition"
+#'   use2_variables="Condition",
+#'   subject_id="subject_nr"
 #' )
 #' 
-#' mt_plot(mt_example,
+#' mt_plot_aggregate(KH2017,
+#'   use="tn_trajectories",
+#'   x="xpos", y="ypos", color="Condition",
+#'   subject_id="subject_nr"
+#' )
+#' 
+#' \dontrun{
+#' mt_plot(KH2017,
 #'   use="tn_trajectories",
 #'   x="xpos", y="ypos", color="Condition"
 #' )
-#'         
-#' mt_plot_aggregate(mt_example,
-#'   use="tn_trajectories",
-#'   x="xpos", y="ypos", color="Condition"
-#' )
+#' }
 #' 
 #' @docType package
 #' @name mousetrap

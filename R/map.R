@@ -12,11 +12,11 @@
 #' change-of-mind trials. \code{mt_map} allows to map trajectories to a
 #' predefined set of trajectory types.
 #' 
-#' First, \code{mt_map} adjusts prototypes to match the coordinate system of the 
+#' First, \code{mt_map} adjusts prototypes to match the coordinate system of the
 #' trajectories specified by \code{use}. Next, \code{mt_map} computes the 
 #' distances between each trajectory and each of the supplied prototypes (see 
-#' \link{mt_distmat}) and then assigns each trajectory to the prototype that 
-#' produced the smallest distance.
+#' \link{mt_distmat}) and then assigns each trajectory to the closest prototype
+#' (i.e., the prototype that produced the smallest distance).
 #' 
 #' Mapping trajectories to prototypes requires that the endpoints of all
 #' trajectories (and added prototypes) share the same direction, i.e., that all
@@ -51,18 +51,24 @@
 #'         
 #' @examples
 #' # Spatialize trajectories
-#' mt_example <- mt_spatialize(mt_example)
+#' KH2017 <- mt_spatialize(KH2017)
 #' 
 #' # Map trajectories onto standard prototype set
-#' mt_example <- mt_map(mt_example,
-#'   use="sp_trajectories", prototypes=mt_prototypes)
-#'   
-#' # Plot trajectories per cluster
-#' mt_plot(mt_example,use2="prototyping",facet_col="prototype_label")
+#' KH2017 <- mt_map(KH2017,
+#'   use="sp_trajectories")
 #' 
-#'     
+#' 
+#' # Plot prototypes
+#' mt_plot(mt_prototypes,facet_col="mt_id") + 
+#'   ggplot2::facet_grid(.~factor(mt_id,levels=unique(mt_id)))
+#' 
+#' # Plot trajectories per assigned prototype
+#' mt_plot(KH2017,use="sp_trajectories",
+#'   use2="prototyping",facet_col="prototype_label")
+#' 
+#' 
 #' # Map trajectories onto reduced prototype set
-#' mt_example <- mt_map(mt_example,
+#' KH2017 <- mt_map(KH2017,
 #'   use="sp_trajectories",
 #'   prototypes=mt_prototypes[c("straight","curved","cCoM"),,],
 #'   save_as="prototyping_red")
@@ -79,7 +85,7 @@
 #' )
 #' 
 #' # Map trajectories
-#' mt_example <- mt_map(mt_example,
+#' KH2017 <- mt_map(KH2017,
 #'   use="sp_trajectories", prototypes=mt_prototypes_ext,
 #'   save_as="prototyping_ext")
 #' 
@@ -92,15 +98,17 @@
 #' @export
 mt_map <- function(
   data,
-  use = 'trajectories',
+  use = 'sp_trajectories',
   save_as = 'prototyping',
   dimensions = c('xpos','ypos'),
   
   # prototype arguments
-  prototypes,
+  prototypes = mousetrap::mt_prototypes,
 
   # distance arguments
+  weights = rep(1, length(dimensions)),
   pointwise = TRUE,
+  na_rm = FALSE,  
   minkowski_p = 2
   ){
 
@@ -109,27 +117,40 @@ mt_map <- function(
   
   # Tests
   if(!length(dimensions) %in% c(2,3)) stop('Dimensions must be of length 2 or 3.')
-  if(!all(dimensions %in% dimnames(trajectories)[[3]])) stop('Not all dimensions exist.')
+  if(!all(dimensions %in% dimnames(trajectories)[[3]])) stop(paste0('Not all dimensions found in "',use,'".'))
+  
   # Ensure that there are no NAs
   if(any(is.na(trajectories[,,dimensions]))) {
     stop("Missing values in trajectories not allowed for mt_map ",
          "as all trajectories must have the same number of observations.")
   }
   
+  # check prototype dimensionality
+  if(!all(dimensions %in% dimnames(prototypes)[[3]])) stop(paste0('Not all dimensions found in prototypes.'))
+  
   # Align and rescale prototypes and combine them with trajectories
   n_points <- dim(trajectories)[2]
   n_proto  <- dim(prototypes)[1]
   prototypes <- mt_align(prototypes,coordinates = c(
     colMeans(trajectories[,1,dimensions]),colMeans(trajectories[,n_points,dimensions])
-  ))
+    ))
   prototypes <- mt_spatialize(prototypes,n_points = n_points, dimensions = dimensions)
   joint_array <- mt_bind(prototypes,trajectories,verbose=FALSE)
   
+  # limit trajectories to dimensions
+  joint_array <- joint_array[,,dimensions]
+  
+  # prepare trajectories
+  joint_array = prepare_trajectories(trajectories = joint_array, 
+                                      dimensions = dimensions, 
+                                      weights = weights,
+                                      na_rm = na_rm)  
 
   # ---- compute distance & closest prototype
   distm <-  mt_distmat(
     joint_array,
     dimensions = dimensions,
+    weights = NULL,
     pointwise = pointwise,
     minkowski_p = minkowski_p)
   

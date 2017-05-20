@@ -4,8 +4,9 @@
 \alias{mt_map}
 \title{Map trajectories to prototypes.}
 \usage{
-mt_map(data, use = "trajectories", save_as = "prototyping",
-  dimensions = c("xpos", "ypos"), prototypes, pointwise = TRUE,
+mt_map(data, use = "sp_trajectories", save_as = "prototyping",
+  dimensions = c("xpos", "ypos"), prototypes = mousetrap::mt_prototypes,
+  weights = rep(1, length(dimensions)), pointwise = TRUE, na_rm = FALSE,
   minkowski_p = 2)
 }
 \arguments{
@@ -28,11 +29,23 @@ trajectories are mapped to. As a starting point, the trajectories stored in
 \link{mt_prototypes} can be used. See Details and Examples for selecting 
 prototypes and creating new ones.}
 
+\item{weights}{numeric vector specifying the relative importance of the 
+variables specified in \code{dimensions}. Defaults to a vector of 1s 
+implying equal importance. Technically, each variable is rescaled so that
+the standard deviation matches the corresponding value in \code{weights}.
+To use the original variables, set \code{weights = NULL}.}
+
 \item{pointwise}{boolean specifying the way dissimilarity between the 
 trajectories is measured (see Details). If \code{TRUE} (the default), 
 \code{mt_distmat} measures the average dissimilarity and then sums the 
 results. If \code{FALSE}, \code{mt_distmat}  measures dissimilarity once 
 (by treating the various points as independent dimensions).}
+
+\item{na_rm}{logical specifying whether trajectory points containing NAs 
+should be removed. Removal is done column-wise. That is, if any trajectory 
+has a missing value at, e.g., the 10th recorded position, the 10th position
+is removed for all trajectories. This is necessary to compute distance
+between trajectories.}
 
 \item{minkowski_p}{an integer specifying the distance metric. 
 \code{minkowski_p = 1} computes the city-block distance, \code{minkowski_p 
@@ -63,11 +76,11 @@ mildly and strongly curved trajctories, and single and multiple
 change-of-mind trials. \code{mt_map} allows to map trajectories to a
 predefined set of trajectory types.
 
-First, \code{mt_map} adjusts prototypes to match the coordinate system of the 
+First, \code{mt_map} adjusts prototypes to match the coordinate system of the
 trajectories specified by \code{use}. Next, \code{mt_map} computes the 
 distances between each trajectory and each of the supplied prototypes (see 
-\link{mt_distmat}) and then assigns each trajectory to the prototype that 
-produced the smallest distance.
+\link{mt_distmat}) and then assigns each trajectory to the closest prototype
+(i.e., the prototype that produced the smallest distance).
 
 Mapping trajectories to prototypes requires that the endpoints of all
 trajectories (and added prototypes) share the same direction, i.e., that all
@@ -79,18 +92,24 @@ Schulte-Mecklenbeck, 2017).
 }
 \examples{
 # Spatialize trajectories
-mt_example <- mt_spatialize(mt_example)
+KH2017 <- mt_spatialize(KH2017)
 
 # Map trajectories onto standard prototype set
-mt_example <- mt_map(mt_example,
-  use="sp_trajectories", prototypes=mt_prototypes)
-  
-# Plot trajectories per cluster
-mt_plot(mt_example,use2="prototyping",facet_col="prototype_label")
+KH2017 <- mt_map(KH2017,
+  use="sp_trajectories")
 
-    
+
+# Plot prototypes
+mt_plot(mt_prototypes,facet_col="mt_id") + 
+  ggplot2::facet_grid(.~factor(mt_id,levels=unique(mt_id)))
+
+# Plot trajectories per assigned prototype
+mt_plot(KH2017,use="sp_trajectories",
+  use2="prototyping",facet_col="prototype_label")
+
+
 # Map trajectories onto reduced prototype set
-mt_example <- mt_map(mt_example,
+KH2017 <- mt_map(KH2017,
   use="sp_trajectories",
   prototypes=mt_prototypes[c("straight","curved","cCoM"),,],
   save_as="prototyping_red")
@@ -107,7 +126,7 @@ mt_prototypes_ext <- mt_add_trajectory(mt_prototypes_ext,
 )
 
 # Map trajectories
-mt_example <- mt_map(mt_example,
+KH2017 <- mt_map(KH2017,
   use="sp_trajectories", prototypes=mt_prototypes_ext,
   save_as="prototyping_ext")
 

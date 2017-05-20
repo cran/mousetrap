@@ -2,7 +2,7 @@
 #' 
 #' Performs trajectory clustering. It first computes distances between each pair
 #' of trajectories and then applies off-the-shelf clustering tools to explain 
-#' the resulting dissimiliarity matrix using a predefined number of clusters.
+#' the resulting dissimilarity matrix using a predefined number of clusters.
 #' 
 #' \code{mt_cluster} uses off-the-shelf clustering tools, i.e., 
 #' \link[fastcluster]{hclust} and \link[stats]{kmeans}, for cluster estimation. 
@@ -42,8 +42,13 @@
 #'   should be used. Can be of length 2 or 3, for two-dimensional or 
 #'   three-dimensional trajectories respectively.
 #' @param n_cluster an integer specifying the number of clusters to estimate.
-#' @param method character string specifiying the clustering procedure. Either
+#' @param method character string specifying the clustering procedure. Either
 #'   \link[fastcluster]{hclust} (the default) or \link[stats]{kmeans}.
+#' @param weights numeric vector specifying the relative importance of the 
+#'   variables specified in \code{dimensions}. Defaults to a vector of 1s 
+#'   implying equal importance. Technically, each variable is rescaled so that
+#'   the standard deviation matches the corresponding value in \code{weights}.
+#'   To use the original variables, set \code{weights = NULL}.
 #' @param pointwise boolean specifying the way in which dissimilarity between
 #'   the trajectories is measured. If \code{TRUE} (the default),
 #'   \code{mt_distmat} measures the average dissimilarity and then sums the
@@ -63,6 +68,11 @@
 #'   procedure. Larger numbers minimize the risk of finding local minima. Passed
 #'   on to the \code{nstart} argument of \link[stats]{kmeans}. Only relevant if 
 #'   \code{method} is "kmeans".
+#' @param na_rm logical specifying whether trajectory points containing NAs 
+#'   should be removed. Removal is done column-wise. That is, if any trajectory 
+#'   has a missing value at, e.g., the 10th recorded position, the 10th position
+#'   is removed for all trajectories. This is necessary to compute distance
+#'   between trajectories.
 #' @param cluster_output logical. If \code{FALSE} (the default), the mousetrap 
 #'   data object with the cluster assignments is returned (see Value). If 
 #'   \code{TRUE}, the output of the cluster method (\code{kmeans} or 
@@ -91,10 +101,14 @@
 #'
 #' @examples
 #' # Spatialize trajectories
-#' mt_example <- mt_spatialize(mt_example)
+#' KH2017 <- mt_spatialize(KH2017)
 #'
 #' # Cluster trajectories
-#' mt_example <- mt_cluster(mt_example, use="sp_trajectories")
+#' KH2017 <- mt_cluster(KH2017, use="sp_trajectories")
+#' 
+#' # Plot clustered trajectories
+#' mt_plot(KH2017,use="sp_trajectories",
+#'   use2="clustering",facet_col="cluster")
 #'
 #' @author
 #' Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
@@ -111,6 +125,7 @@ mt_cluster <- function(data,
                       method='hclust',
 
                       # distance arguments
+                      weights = rep(1,length(dimensions)),
                       pointwise=TRUE,
                       minkowski_p=2,
 
@@ -118,13 +133,14 @@ mt_cluster <- function(data,
                       hclust_method='ward.D',
                       kmeans_nstart=10,
 
+                      na_rm = FALSE,
                       cluster_output=FALSE,
                       verbose=FALSE
                       ){
 
   # Extract data
   trajectories <- extract_data(data, use)
-
+  
   # Tests
   if (!length(dimensions) %in% c(2, 3))
     stop('Dimensions must be of length 2 or 3.')
@@ -132,24 +148,26 @@ mt_cluster <- function(data,
     stop('Not all dimensions exist.')
   if (!method %in% c("hclust", "kmeans"))
     stop('Method must either be "hclust" or "kmeans".')
-
-  # Ensure that there are no NAs
-  if (any(is.na(trajectories[,,dimensions]))) {
-    stop("Missing values in trajectories not allowed for mt_distmat ",
-         "as all trajectories must have the same number of observations.")
-  }
-
+  
+  
+  # prepare trajectories
+  trajectories = prepare_trajectories(trajectories = trajectories, 
+                                      dimensions = dimensions, 
+                                      weights = weights,
+                                      na_rm = na_rm)
+  
   # Cluster trajectories
   if (method == 'hclust') {
     # ... using hclust method
     distm <- mt_distmat(
       trajectories,
       dimensions=dimensions,
+      weights = NULL,
       pointwise=pointwise,
       minkowski_p=minkowski_p
     )
     distm <- stats::as.dist(distm)
-
+    
     # Actual clustering
     cl_obj <- fastcluster::hclust(distm, method=hclust_method)
     cl_ass <- stats::cutree(cl_obj, n_cluster)

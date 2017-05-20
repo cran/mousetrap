@@ -6,8 +6,9 @@
 \usage{
 mt_cluster(data, use = "sp_trajectories", save_as = "clustering",
   dimensions = c("xpos", "ypos"), n_cluster = 5, method = "hclust",
-  pointwise = TRUE, minkowski_p = 2, hclust_method = "ward.D",
-  kmeans_nstart = 10, cluster_output = FALSE, verbose = FALSE)
+  weights = rep(1, length(dimensions)), pointwise = TRUE, minkowski_p = 2,
+  hclust_method = "ward.D", kmeans_nstart = 10, na_rm = FALSE,
+  cluster_output = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -26,8 +27,14 @@ three-dimensional trajectories respectively.}
 
 \item{n_cluster}{an integer specifying the number of clusters to estimate.}
 
-\item{method}{character string specifiying the clustering procedure. Either
+\item{method}{character string specifying the clustering procedure. Either
 \link[fastcluster]{hclust} (the default) or \link[stats]{kmeans}.}
+
+\item{weights}{numeric vector specifying the relative importance of the 
+variables specified in \code{dimensions}. Defaults to a vector of 1s 
+implying equal importance. Technically, each variable is rescaled so that
+the standard deviation matches the corresponding value in \code{weights}.
+To use the original variables, set \code{weights = NULL}.}
 
 \item{pointwise}{boolean specifying the way in which dissimilarity between
 the trajectories is measured. If \code{TRUE} (the default),
@@ -52,6 +59,12 @@ procedure. Larger numbers minimize the risk of finding local minima. Passed
 on to the \code{nstart} argument of \link[stats]{kmeans}. Only relevant if 
 \code{method} is "kmeans".}
 
+\item{na_rm}{logical specifying whether trajectory points containing NAs 
+should be removed. Removal is done column-wise. That is, if any trajectory 
+has a missing value at, e.g., the 10th recorded position, the 10th position
+is removed for all trajectories. This is necessary to compute distance
+between trajectories.}
+
 \item{cluster_output}{logical. If \code{FALSE} (the default), the mousetrap 
 data object with the cluster assignments is returned (see Value). If 
 \code{TRUE}, the output of the cluster method (\code{kmeans} or 
@@ -70,7 +83,7 @@ A mousetrap data object (see \link{mt_example}) with an additional
 \description{
 Performs trajectory clustering. It first computes distances between each pair
 of trajectories and then applies off-the-shelf clustering tools to explain 
-the resulting dissimiliarity matrix using a predefined number of clusters.
+the resulting dissimilarity matrix using a predefined number of clusters.
 }
 \details{
 \code{mt_cluster} uses off-the-shelf clustering tools, i.e., 
@@ -106,10 +119,14 @@ Kieslich, Henninger, & Schulte-Mecklenbeck, 2017).
 }
 \examples{
 # Spatialize trajectories
-mt_example <- mt_spatialize(mt_example)
+KH2017 <- mt_spatialize(KH2017)
 
 # Cluster trajectories
-mt_example <- mt_cluster(mt_example, use="sp_trajectories")
+KH2017 <- mt_cluster(KH2017, use="sp_trajectories")
+
+# Plot clustered trajectories
+mt_plot(KH2017,use="sp_trajectories",
+  use2="clustering",facet_col="cluster")
 
 }
 \references{

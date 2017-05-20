@@ -68,7 +68,7 @@ create_results <- function(data, results, use, save_as, ids=NULL, overwrite=TRUE
         if (any(colnames(results)%in%colnames(data[[save_as]]))){
           # if so, remove them and issue warning
           data[[save_as]] <- data[[save_as]][,colnames(data[[save_as]])[!colnames(data[[save_as]])%in%colnames(results)],drop=FALSE]
-          warning("Columns of same name already exist and have been removed.")
+          warning("Columns of same name already exist and have been replaced")
         }
         # ensure id column is present
         data[[save_as]][,"mt_id"] <- as.character(rownames(data[[save_as]]))
@@ -336,6 +336,87 @@ round_even = function(x){
                  ifelse(x <  rx,floor(x),ceiling(x)),
                  ifelse(x >= rx,ceiling(x),floor(x))))
 }
+
+
+# Cohens d
+# Computed cohens d
+cohen = function(x,y){
+  
+  nx = length(x)
+  ny = length(y)
+  vx = stats::var(x)
+  vy = stats::var(y)
+  
+  nom = mean(x) - mean(y)
+  den = sqrt(((nx-1)*vx + (ny-1)*vy)/(nx+ny-2))
+  coh = nom / den
+  
+  v_d = sqrt((nx+ny)/(nx*ny) + (coh*coh) / (2 * (nx + ny)))
+  
+  rx = vx/nx
+  ry = vy/ny
+  nu = (rx + ry)**2 / ((rx ** 2 / (rx - 1) + (ry ** 2 / (ry - 1))))
+             
+  return(c(coh,v_d,nu))
+  }
+
+# draws from truncated normal
+trnorm <- function(n,m,sd,a,b){
+  v = stats::rnorm(n,m,sd)
+  repeat{
+    sel =  v < a | v > b
+    if(all(!sel)) break
+    v[sel] = stats::rnorm(sum(sel),m,sd)
+  }
+  return(v)
+}
+
+
+# NA removal and transformation for all clustering related functions
+# E.g., mt_cluster, mt_cluster_k, etc.
+
+prepare_trajectories = function(trajectories, dimensions, weights, na_rm){
+  
+  # limit trajectories to dimensions
+  trajectories <- trajectories[,,dimensions]
+  
+  # Ensure that there are no NAs
+  include = rep(TRUE,ncol(trajectories))
+  if(na_rm == TRUE){
+    for(dim in dimensions) include = include & colSums(is.na(trajectories[,,dim])) == 0
+    if(sum(include) == 0) stop('No complete case in use')
+    if(mean(include) != 1) warning(paste('Removed',sum(!include),'trajectory points due to NAs'))
+  } else {
+    if(any(is.na(trajectories[,,dimensions]))) {
+      stop("Missing values in trajectories not allowed for mt_distmat ",
+           "as all trajectories must have the same number of observations.")
+    }
+  }
+  
+  # Remove NAs
+  trajectories <- trajectories[,include,]
+  
+  # weight variables
+  if(!is.null(weights)){
+    if(length(weights) == length(dimensions)){
+      for(i in 1:length(dimensions)){
+        trajectories[,,dimensions[i]] = trans_mat(trajectories[,,dimensions[i]],scale = weights[i])
+      }
+    } else {
+      stop('weights must match length of dimensions')
+    }
+  }
+  
+  # return trajectories
+  return(trajectories)
+}
+
+
+
+
+
+
+
 
 
 

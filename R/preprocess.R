@@ -967,7 +967,11 @@ mt_average <- function(data,
           current_av_values <= (lower_borders[j] + interval_sizes[j]))
         return(mean(current_measures[in_interval], na.rm=TRUE))
       })
-
+      
+      # Replace NaNs with NAs
+      # (NaNs occur only if a specific dimension contains only NAs for an interval)
+      av_measures[is.nan(av_measures)] <- NA
+      
       av_trajectories[i,1:nintervals,var] <- av_measures
     }
 
@@ -1091,7 +1095,7 @@ mt_subset <- function(data, subset, check="data") {
 #' @return A mousetrap data object (see \link{mt_example}).
 #'   
 #'   If a data.frame with label specified in \code{save_as} (by default 
-#'   "measures") already exists, the number of obervations (called \code{nobs})
+#'   "measures") already exists, the number of observations (called \code{nobs})
 #'   are added as additional column. If not, an additional \link{data.frame}
 #'   will be added.
 #'   
