@@ -7,7 +7,7 @@
 mt_map(data, use = "sp_trajectories", save_as = "prototyping",
   dimensions = c("xpos", "ypos"), prototypes = mousetrap::mt_prototypes,
   weights = rep(1, length(dimensions)), pointwise = TRUE, na_rm = FALSE,
-  minkowski_p = 2)
+  minkowski_p = 2, use2 = "data", grouping_variables = NULL)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -51,6 +51,17 @@ between trajectories.}
 \code{minkowski_p = 1} computes the city-block distance, \code{minkowski_p 
 = 2} (the default) computes the Euclidian distance, \code{minkowski_p = 3} 
 the cubic distance, etc.}
+
+\item{use2}{an optional character string specifying where the data that
+contain the variables used for grouping can be found (in case
+\code{grouping_variables} are specified). Defaults to "data" as
+\code{data[["data"]]} usually contains all non mouse-tracking trial data.}
+
+\item{grouping_variables}{a character string (or vector) specifying one or
+more variables in \code{use2}. If specified, prototypes will be rescaled
+separately to match the coordinate system of the trajectories for each
+level of the variable(s). If unspecified (the default), the prototypes are
+rescaled in the same way across all trajectories.}
 }
 \value{
 A mousetrap data object (see \link{mt_example}) with an additional 
@@ -69,10 +80,9 @@ of the supplied trajectory types and then assigns each trajectory to the
 prototype that produced the smallest distance.
 }
 \details{
-Mouse trajectories often occur in distinct, qualitative types (see Wulff, 
-Haslbeck, Schulte-Mecklenbeck, 2017; Haslbeck, Wulff, Kieslich, Henninger, & 
-Schulte-Mecklenbeck, 2017). Common trajectory types are linear trajectories, 
-mildly and strongly curved trajctories, and single and multiple 
+Mouse trajectories often occur in distinct, qualitative types (see Wulff et
+al., in press; Wulff et al., 2018). Common trajectory types are linear
+trajectories, mildly and strongly curved trajctories, and single and multiple
 change-of-mind trials. \code{mt_map} allows to map trajectories to a
 predefined set of trajectory types.
 
@@ -87,8 +97,7 @@ trajectories (and added prototypes) share the same direction, i.e., that all
 trajectories end in the top-left corner of the coordinate system
 (\link{mt_remap_symmetric} or \link{mt_align} can be used to achieve this).
 Furthermore, it is recommended to use spatialized trajectories (see
-\link{mt_spatialize}; Haslbeck, Wulff, Kieslich, Henninger, &
-Schulte-Mecklenbeck, 2017).
+\link{mt_spatialize}; Wulff et al., in press; Haslbeck et al., 2018).
 }
 \examples{
 # Spatialize trajectories
@@ -133,16 +142,25 @@ KH2017 <- mt_map(KH2017,
 
 }
 \references{
-Wulff, D. U., Haslbeck, J. M. B., & Schulte-Mecklenbeck, M. 
-  (2017). Measuring the (dis-)continuous mind. Manuscript in preparation.
-  
-  Haslbeck, J. M. B., Wulff, D. U., Kieslich, P. J., Henninger, F., & 
-  Schulte-Mecklenbeck, M. (2017). Advanced mouse- and hand-tracking analysis:
-  Detecting and visualizing clusters in movement trajectories. Manuscript in 
-  preparation.
+Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+  & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+  movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+  Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+  Taylor & Francis.
+   
+  Wulff, D. U., Haslbeck, J. M. B., & Schulte-Mecklenbeck, M. (2018).
+  \emph{Measuring the (dis-)continuous mind: What movement trajectories
+  reveal about cognition}. Manuscript in preparation.
+
+  Haslbeck, J. M. B., Wulff, D. U., Kieslich, P. J., Henninger, F., &
+  Schulte-Mecklenbeck, M. (2018). \emph{Advanced mouse- and hand-tracking
+  analysis: Detecting and visualizing clusters in movement trajectories}.
+  Manuscript in preparation.
 }
 \author{
 Dirk U. Wulff (\email{dirk.wulff@gmail.com})
 
 Jonas M. B. Haslbeck (\email{jonas.haslbeck@gmail.com})
+
+Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
 }

@@ -105,19 +105,18 @@
 #'
 #' @return A \code{\link{data.frame}} containing the reshaped data.
 #'
-#' @seealso
-#' \link{mt_aggregate} for aggregating mouse-tracking measures and trajectories.
+#' @seealso \link{mt_aggregate} for aggregating mouse-tracking measures and
+#'   trajectories.
 #'
-#' \link{mt_aggregate_per_subject} for aggregating mouse-tracking measures and
-#' trajectories per subject.
+#'   \link{mt_aggregate_per_subject} for aggregating mouse-tracking measures and
+#'   trajectories per subject.
 #'
-#' \link{mt_export_long} for exporting mouse-tracking data in long format.
+#'   \link{mt_export_long} for exporting mouse-tracking data in long format.
 #'
-#' \link{mt_export_wide} for exporting mouse-tracking data in wide format.
+#'   \link{mt_export_wide} for exporting mouse-tracking data in wide format.
 #'
-#' \link[dplyr]{inner_join} for merging data and
-#' \code{\link[dplyr]{summarize_at}} for aggregating data using the \code{dplyr}
-#' package.
+#'   \link[dplyr]{inner_join} for merging data and \code{\link[dplyr]{summarize_at}}
+#'   for aggregating data using the \code{dplyr} package.
 #'
 #'
 #' @examples
@@ -305,7 +304,7 @@ mt_reshape <- function(data,
       grouping_variables <- c(subject_id, use2_variables, mt_seq)
 
       dataset <- dplyr::group_by_(dataset, .dots=grouping_variables)
-      dataset <- dplyr::summarize_at(dataset, .funs=.funs, .cols=use_variables)
+      dataset <- dplyr::summarize_at(dataset, .funs=.funs, .vars=use_variables)
 
       if (aggregate_subjects_only == FALSE){
         if(length(.funs) > 1) {
@@ -329,7 +328,7 @@ mt_reshape <- function(data,
       }
 
       # Perform aggregation
-      dataset <- dplyr::summarize_at(dataset, .funs=.funs, .cols=use_variables)
+      dataset <- dplyr::summarize_at(dataset, .funs=.funs, .vars=use_variables)
 
     }
   }

@@ -1,8 +1,30 @@
+# mousetrap 3.1.1
+
+## Announcements
+* A book chapter on the mousetrap software packages has been accepted for publication. It covers many common analyses using the mousetrap R package. Please cite it as follows when using mousetrap in your research:
+* Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to implementation and analysis. In M. Schulte-Mecklenbeck, A. Kühberger, & J. G. Johnson (Eds.), _A Handbook of Process Tracing Methods_. New York: Taylor & Francis.
+* Besides, if you use functions for clustering and mapping trajectories, please also include the following reference:
+* Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F., & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in movement trajectories. In M. Schulte-Mecklenbeck, A. Kühberger, & J. G. Johnson (Eds.), _A Handbook of Process Tracing Methods_. New York: Taylor & Francis.
+* If you have any questions when using mousetrap, you can now ask them in the mousetrap forum at http://forum.cogsci.nl/index.php?p=/categories/mousetrap
+
+## Changes in specific functions
+* `mt_map`: now allows for mapping trajectories onto prototypes separately for different groups of trajectories (the prototypes will be rescaled separately to match the coordinate system of each group).
+* `mt_heatmap_ggplot`: now allows for faceting using the `facet_row` and `facet_col` arguments.
+* `mt_diffmap`: the `condition` can now simply be specified by providing the corresponding variable name (and the condition values can now be any type, provided that they only contain two levels).
+* `mt_plot` and `mt_plot_aggregate`: transparency and line width can now be varied via the `alpha` and `size` arguments.
+* `mt_plot_riverbed`: introduced `grid_colors` argument for setting the grid colors (use `grid_colors = NA` to omit grid lines).
+* `mt_reshape`: internal changes reflecting changes in `dplyr::summarize_at`.
+* `mt_align_start` and `mt_align_start_end`: if `start` is computed internally, it is now ensured that it is a named vector.
+* `mt_plot_add_rect`: it is now ensured that this function does not influence the legend (previously, this could happen if the `linetype` argument was used in `mt_plot`)
+
+
 # mousetrap 3.1.0
 
 ## Announcements
-* A first paper on the mousetrap software packages has been accepted for publication. It presents the mousetrap plugin for creating mouse-tracking experiments in OpenSesame and also includes a short demonstration of basic analyses using the mousetrap R package.
-* Reference: Kieslich, P. J., & Henninger, F. (in press). Mousetrap: An integrated, open-source mouse-tracking package. _Behavior Research Methods_. doi:10.3758/s13428-017-0900-z
+* A first paper on the mousetrap software packages has been published. It presents the mousetrap plugin for creating mouse-tracking experiments in OpenSesame and also includes a short demonstration of basic analyses using the mousetrap R package. Please cite it as follows when using the mousetrap plugin in your research.
+* Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An integrated, open-source mouse-tracking package. _Behavior Research Methods, 49_(5), 1652-1667. https://doi.org/10.3758/s13428-017-0900-z
+* The reference for the mousetrap R package has been updated as Zenodo now supports version independent DOIs.
+* Kieslich, P. J., Wulff, D. U., Henninger, F., Haslbeck, J. M. B., & Schulte-Mecklenbeck, M. (2016). Mousetrap: An R package for processing and analyzing mouse-tracking data. https://doi.org/10.5281/zenodo.596640
 
 ## Changes in specific functions
 * `mt_derivatives`: now always reports acceleration as difference in absolute velocity (the argument `acc_on_abs_vel` has been removed). Besides, the argument `absolute` has been introduced that indicates if absolute values for distances and velocities should be reported (by default, this is not the case). All of this is only relevant if a single dimension is specified in `dimensions`. 

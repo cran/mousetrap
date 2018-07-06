@@ -71,7 +71,7 @@ third dimension's color intensity across the entire image. Defaults to 0.1.
 Only relevant if a third dimension is specified in \code{colors}.}
 
 \item{aggregate_lwd}{an integer specifying the width of the aggregate 
-trajectory. If \code{aggregate_lwd} is > 0 (the default), the aggregate 
+trajectory. If \code{aggregate_lwd} is 0 (the default), the aggregate 
 trajectory is omitted.}
 
 \item{aggregate_col}{a character value specifying the color of the aggregate 
@@ -120,11 +120,24 @@ are visible. In order to do this, specify a third variable label in
 \code{dimensions} and control its appearance using the \code{color} and 
 \code{mean_color} arguments.
 }
+\references{
+Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+  & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+  movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+  Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+  Taylor & Francis.
+
+  Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
+  Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+  implementation and analysis. In M. Schulte-Mecklenbeck, A. Kuehberger, & J.
+  G. Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+  Taylor & Francis.
+}
 \seealso{
-\link{mt_heatmap} and  \link{mt_heatmap_ggplot} for plotting trajectory
-heatmaps.
-    
-\link{mt_diffmap} for plotting trajectory difference-heatmaps.
+\link{mt_heatmap} and  \link{mt_heatmap_ggplot} for plotting
+  trajectory heatmaps.
+
+  \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 }
 \author{
 Dirk U. Wulff (\email{dirk.wulff@gmail.com})

@@ -80,9 +80,9 @@ mt_example <- mt_measures(mt_example)
 mt_check_bimodality(mt_example,
   use_variables=c("MAD", "AD"))
 
-# Standardize variables
+# Standardize variables per participant
 mt_example <- mt_standardize(mt_example,
-  use_variables=c("MAD", "AD"))
+  use_variables=c("MAD", "AD"), within="subject_nr")
   
 # Assess bimodality for standardized variables
 mt_check_bimodality(mt_example,
@@ -114,9 +114,9 @@ Processes & Intergroup Relations, 18}(3), 384-401.
 }
 \seealso{
 \link{bimodality_coefficient} for more information about the bimodality
-coefficient.
+  coefficient.
 
-\link[diptest]{dip.test} for more information about Hartigan's dip test.
+  \link[diptest]{dip.test} for more information about Hartigan's dip test.
 }
 \author{
 Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})

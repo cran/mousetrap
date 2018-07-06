@@ -64,7 +64,7 @@
 #'   third dimension's color intensity across the entire image. Defaults to 0.1.
 #'   Only relevant if a third dimension is specified in \code{colors}.
 #' @param aggregate_lwd an integer specifying the width of the aggregate 
-#'   trajectory. If \code{aggregate_lwd} is > 0 (the default), the aggregate 
+#'   trajectory. If \code{aggregate_lwd} is 0 (the default), the aggregate 
 #'   trajectory is omitted.
 #' @param aggregate_col a character value specifying the color of the aggregate 
 #'   trajectory.
@@ -81,12 +81,23 @@
 #' @return An object of class \code{mt_object_raw} containing in a matrix format
 #'   the image's pixel information, the aggregate trajectory, and the colors.
 #' 
-#' @seealso
-#' \link{mt_heatmap} and  \link{mt_heatmap_ggplot} for plotting trajectory
-#' heatmaps.
-#'     
-#' \link{mt_diffmap} for plotting trajectory difference-heatmaps.
+#' @seealso \link{mt_heatmap} and  \link{mt_heatmap_ggplot} for plotting
+#'   trajectory heatmaps.
+#'
+#'   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 #' 
+#' @references Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+#'   & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+#'   movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+#'   Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'
+#'   Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
+#'   Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+#'   implementation and analysis. In M. Schulte-Mecklenbeck, A. Kuehberger, & J.
+#'   G. Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'   
 #' @export
 mt_heatmap_raw <- function(
   data,
@@ -124,8 +135,8 @@ mt_heatmap_raw <- function(
 ){
   
   # Data checks
-  if (!length(dimensions) %in% c(2, 3)) {
-    stop('Dimensions must of length 2 or 3!')
+  if (!length(dimensions) %in% c(1, 2, 3)) {
+    stop('Dimensions must of length 1, 2 or 3!')
   }
   
   # extract trajectories  
@@ -134,8 +145,18 @@ mt_heatmap_raw <- function(
   if (!all(dimensions %in% dimnames(trajectories)[[3]])) {
     stop('Not all dimensions exist in data')
   }
+  trajectories <- trajectories[,,dimensions,drop = F]
   
-  trajectories <- trajectories[,,dimensions]
+  # Add first dimension -----------------------------------------------------
+  
+  if(length(dimensions) == 1){
+    add = matrix(rep(1:ncol(trajectories),nrow(trajectories)), 
+                 ncol = ncol(trajectories), byrow = T)
+    trajectories <- mt_add_variables(trajectories, variables = list('add' = add))
+    trajectories <- trajectories[,,2:1]
+    dimensions <- c('add',dimensions)
+  }
+  
   
   # Subsample trajectories -----------------------------------------------------
   # If n_trajectories is smaller than number of trajectories,
@@ -427,13 +448,27 @@ mt_heatmap_raw <- function(
 #' @param plot_dims adds the coordinates of the four image corners to the plot. 
 #'   Helps setting \code{bounds}.
 #'   
-#' @seealso
-#' \link{mt_heatmap_ggplot} for plotting a trajectory heatmap using ggplot2.
-#'     
-#' \link{mt_diffmap} for plotting trajectory difference-heatmaps.
+#' @seealso \link{mt_heatmap_ggplot} for plotting a trajectory heatmap using
+#'   ggplot2.
+#'
+#'   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 #' 
+#' @author Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
+#' 
+#' @references Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+#'   & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+#'   movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+#'   Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'
+#'   Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
+#'   Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+#'   implementation and analysis. In M. Schulte-Mecklenbeck, A. Kuehberger, & J.
+#'   G. Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'    
 #' @examples
-#' mt_heatmap(KH2017, xres=500, n_shades=5,mean_image=0.2)
+#' mt_heatmap(KH2017, xres=500, n_shades=5, mean_image=0.2)
 #' 
 #' @export
 mt_heatmap <- function(
@@ -572,63 +607,147 @@ mt_heatmap <- function(
 #' 
 #' \code{mt_heatmap_ggplot} plots high resolution raw trajectory maps. Note that
 #' this function has beta status.
-#' 
-#' \code{mt_heatmap_ggplot} wraps \link{mt_heatmap_raw} and returns a ggplot 
-#' object containing the plot. In contrast to \code{mt_heatmap_plot} plots 
-#' created by \code{mt_heatmap_ggplot} can be extended using ggplot's \code{+} 
+#'
+#' \code{mt_heatmap_ggplot} wraps \link{mt_heatmap_raw} and returns a ggplot
+#' object containing the plot. In contrast to \code{mt_heatmap_plot} plots
+#' created by \code{mt_heatmap_ggplot} can be extended using ggplot's \code{+}
 #' operator. For further details on how the trajectory heatmaps are constructed,
 #' see \link{mt_heatmap_raw}.
-#' 
+#'
 #' @inheritParams mt_heatmap_raw
-#' @param ... arguments passed to \link{mt_heatmap}.
+#' @param use2 an optional character string specifying where the data that
+#'   contain the variables used for faceting can be found (in case these
+#'   arguments are specified). Defaults to "data" as \code{data[["data"]]}
+#'   usually contains all non mouse-tracking trial data.
+#' @param facet_row an optional character string specifying a variable in
+#'   \code{data[[use2]]} that should be used for (row-wise) faceting.
+#' @param facet_col an optional character string specifying a variable in
+#'   \code{data[[use2]]} that should be used for (column-wise) faceting.
+#' @param ... arguments passed to \link{mt_heatmap_raw}.
 #' 
 #' @author
-#' Felix Henninger
-#' 
-#' Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
-#' 
 #' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
 #'
-#' @seealso
-#' \link{mt_heatmap} for plotting a trajectory heatmap using base plots.
-#'     
-#' \link{mt_diffmap} for plotting trajectory difference-heatmaps.
+#' Felix Henninger
+#'
+#' Dirk U. Wulff
 #' 
+#' @seealso \link{mt_heatmap} for plotting a trajectory heatmap using base
+#'   plots.
+#'
+#'   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
+#' 
+#' @references Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+#'   & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+#'   movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+#'   Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'
+#'   Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
+#'   Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+#'   implementation and analysis. In M. Schulte-Mecklenbeck, A. Kuehberger, & J.
+#'   G. Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'   
 #' @examples
-#' mt_heatmap_ggplot(KH2017, xres=500, n_shades=5,mean_image=0.2)
+#' mt_heatmap_ggplot(KH2017, xres=500, n_shades=5, mean_image=0.2)
 #' 
 #' @export
-mt_heatmap_ggplot <- function(data, use="trajectories", ...) {
+mt_heatmap_ggplot <- function(data,
+  use="trajectories",
+  dimensions = c("xpos", "ypos"),
+  use2="data",
+  facet_row=NULL, facet_col=NULL,
+  ...) {
   
-  plot_data <- mt_heatmap_raw(data=data,use=use,...)
+  # Extract trajectory data
+  trajectories <- extract_data(data=data,use=use)
   
-  return(
-    ggplot2::ggplot(
-      ggplot2::aes_string(x="x", y="y"),
-      data=plot_data$img
+  # Setup bounds (code taken from mt_heatmap_raw)
+  range_x <- range(trajectories[,,dimensions[1]],na.rm=TRUE)
+  range_y <- range(trajectories[,,dimensions[2]],na.rm=TRUE)
+  mid_x <- range_x[1] + diff(range_x) / 2
+  mid_y <- range_y[1] + diff(range_y) / 2
+  range_x <- mid_x + (range_x - mid_x) * 1.02
+  range_y <- mid_y + (range_y - mid_y) * 1.02
+  bounds <- c(range_x[1],range_y[1],range_x[2],range_y[2])
+  
+  # Combine faceting variables
+  use2_variables <- c(facet_col,facet_row)
+  
+  # If faceting variables are specified, create separate heatmaps per facet level
+  if (is.null(use2_variables) == FALSE) {
+    
+    factor_levels <- unique(data[[use2]][,use2_variables,drop=FALSE])
+    for (var in use2_variables){
+      factor_levels <- factor_levels[order(factor_levels[,var]),,drop=FALSE]
+    }
+    
+    plot_data <- data.frame()
+
+    for (i in 1:nrow(factor_levels)){
+      
+      # Select the relevant trajectories
+      keep <- rep(TRUE,nrow(data[[use2]]))
+      for (var in use2_variables){
+        keep <- keep & data[[use2]][,var]==factor_levels[i,var]
+      }
+      current_trajectories <- trajectories[rownames(trajectories) %in% rownames(data[[use2]])[keep],,,drop=FALSE]
+      
+      # Create heatmap
+      current_plot_data <- mt_heatmap_raw(data=current_trajectories,use=use,dimensions=dimensions,bounds=bounds,...)
+      current_plot_data$img[,use2_variables] <- factor_levels[i,use2_variables]
+      plot_data <- rbind(plot_data,current_plot_data$img)
+    }
+    
+    
+  # If no facets are specified, create a single heatmap
+  } else{
+    
+    
+    plot_data <- mt_heatmap_raw(data=data,use=use,dimensions=dimensions,bounds=bounds,...)
+    plot_data <- plot_data$img
+    
+  }
+  
+  
+  
+  # Setup plot
+  current_plot <- ggplot2::ggplot(
+    ggplot2::aes_string(x="x", y="y"),
+    data=plot_data
+  ) +
+    ggplot2::scale_x_continuous(
+      expand=c(0,0), limits=range(plot_data$x)
     ) +
-      ggplot2::scale_x_continuous(
-        expand=c(0,0), limits=range(plot_data$img$x)
-      ) +
-      ggplot2::scale_y_continuous(
-        expand=c(0,0), limits=range(plot_data$img$y)
-      ) +
-      ggplot2::geom_raster(
-        fill=plot_data$img$col
-      ) +
-      ggplot2::theme(
-        panel.grid=ggplot2::element_blank(),
-        panel.border=ggplot2::element_blank(),
-        plot.margin=ggplot2::unit(c(0,0,0,0), "lines"),
-        axis.title.x=ggplot2::element_blank(),
-        axis.text.x=ggplot2::element_blank(),
-        axis.ticks.x=ggplot2::element_blank(),
-        axis.title.y=ggplot2::element_blank(),
-        axis.text.y=ggplot2::element_blank(),
-        axis.ticks.y=ggplot2::element_blank()
-      ) +
-      ggplot2::labs(x=NULL, y=NULL)
-  )
+    ggplot2::scale_y_continuous(
+      expand=c(0,0), limits=range(plot_data$y)
+    ) +
+    ggplot2::geom_raster(
+      fill=plot_data$col
+    ) +
+    ggplot2::theme(
+      panel.grid=ggplot2::element_blank(),
+      panel.border=ggplot2::element_blank(),
+      plot.margin=ggplot2::unit(c(0,0,0,0), "lines"),
+      axis.title=ggplot2::element_blank(),
+      axis.text=ggplot2::element_blank(),
+      axis.ticks=ggplot2::element_blank(),
+      axis.line =ggplot2::element_blank()
+    ) +
+    ggplot2::labs(x=NULL, y=NULL)
+  
+
+  # Add facets (optional)
+  if(is.null(use2_variables) == FALSE) {
+    facet_row <- ifelse(is.null(facet_row),".",facet_row)
+    facet_col <- ifelse(is.null(facet_col),".",facet_col)
+    facet_formula <- stats::as.formula(paste(facet_row,facet_col,sep="~"))
+    current_plot <- current_plot + ggplot2::facet_grid(facet_formula)
+  }
+
+  
+  return(current_plot)
 }
 
 #' Generic print for class mt_heatmap_raw 
@@ -663,12 +782,16 @@ print.mt_heatmap_raw = function(x,...){
 #'   \code{array}, or an object of class \code{mt_heatmap_raw} (as created by
 #'   \link{mt_heatmap_raw}). The class of \code{y} must match the class of 
 #'   \code{x}, unless \code{y} is \code{NULL}.
-#' @param condition logical vector matching the number of trajectories in 
-#'   \code{use}. \code{mt_diffmap} will create a difference-heatmap comparing 
-#'   all trajectories for which \code{condition==TRUE} to all trajectories for
-#'   which \code{condition==FALSE}. If \code{condition} is specified, \code{y}
-#'   will be ignored (unless \code{x} and \code{y} are of class
+#' @param condition either a character value specifying which variable codes the
+#'   two conditions (in \code{x[[use2]]}) that should be compared - or a vector
+#'   matching the number of trajectories in \code{x[[use]]} that has exactly two
+#'   levels. \code{mt_diffmap} will create a difference-heatmap comparing all
+#'   trajectories between the two conditions. If \code{condition} is specified,
+#'   \code{y} will be ignored (unless \code{x} and \code{y} are of class
 #'   \code{heatmap_raw}).
+#' @param use2 an optional character string specifying where the data that
+#'   contain the condition variable can be found. Defaults to "data" as
+#'   \code{x[["data"]]} usually contains all non mouse-tracking trial data.
 #' @param colors a character vector specifying the colors used to color
 #'   cases of \code{image1 > image2, image1 ~ image2, image1 < image2},
 #'   respectively. Note that the colors are used in that specific order.
@@ -684,12 +807,27 @@ print.mt_heatmap_raw = function(x,...){
 #'
 #' @author
 #' Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
+#'
+#' Pascal J. Kieslich
 #' 
-#' \link{mt_heatmap} and  \link{mt_heatmap_ggplot} for plotting trajectory
+#' @seealso
+#' \link{mt_heatmap} and \link{mt_heatmap_ggplot} for plotting trajectory 
 #' heatmaps.
 #' 
+#' @references Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
+#'   & Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+#'   movement trajectories. In M. Schulte-Mecklenbeck, A. Kuehberger, & J. G.
+#'   Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'
+#'   Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
+#'   Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+#'   implementation and analysis. In M. Schulte-Mecklenbeck, A. Kuehberger, & J.
+#'   G. Johnson (Eds.), \emph{A Handbook of Process Tracing Methods}. New York:
+#'   Taylor & Francis.
+#'   
 #' @examples
-#' mt_diffmap(KH2017, condition=KH2017$data$Condition=="Typical",
+#' mt_diffmap(KH2017, condition="Condition",
 #'   xres=400, smooth_radius=6, n_shades=5)
 #' 
 #' @export
@@ -699,6 +837,7 @@ mt_diffmap <- function(
   condition = NULL,
   use = 'trajectories',
   dimensions = c('xpos','ypos'),
+  use2 = 'data',
   filename = NULL,
   bounds = NULL,
   xres = 500,
@@ -733,6 +872,19 @@ mt_diffmap <- function(
     if(is.array(x)) if(!all(dimensions %in% dimnames(x)[[3]])) stop('Not all dimensions found in x.')
     if(!is.null(y) == !is.null(condition)) stop('Specify either y or condition, but not both.')
     if(!is.null(condition)){
+      
+      # If condition label is provided, extract condition values
+      if(length(condition)==1){
+        condition <- x[[use2]][,condition]
+      }
+      
+      # If condition values are not of class logical, convert them
+      if(class(condition) != "logical"){
+        condition_levels <- levels(factor(condition))
+        if (length(condition_levels)!=2) stop('The condition variable can only have two levels.')
+        condition <- condition==condition_levels[1]
+      }
+      
       y = x[[use]][!condition,,] 
       x = x[[use]][ condition,,] 
     }
