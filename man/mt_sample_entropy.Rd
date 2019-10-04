@@ -5,7 +5,8 @@
 \title{Calculate sample entropy.}
 \usage{
 mt_sample_entropy(data, use = "tn_trajectories", save_as = "measures",
-  dimension = "xpos", m = 3, r = NULL, verbose = FALSE)
+  dimension = "xpos", m = 3, r = NULL, use_diff = TRUE,
+  verbose = FALSE)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -26,6 +27,10 @@ used.}
 
 \item{r}{a numeric value passed on to the sample entropy function (see
 Details).}
+
+\item{use_diff}{logical indicating if the differences of the dimension values
+should be computed before calculating sample entropy (which is done by
+default, see Details).}
 
 \item{verbose}{logical indicating whether function should report its
 progress.}
@@ -50,7 +55,8 @@ of movements along one specific dimension.
 \code{mt_sample_entropy} calculates the sample entropy for each trajectory as
 a measure of its complexity. Hehman et al (2015) provide details on how 
 sample entropy can be calculated and applied in mouse-tracking (following 
-Dale et al., 2007). They apply the sample entropy measure to the x-positions 
+Dale et al., 2007). They apply the sample entropy measure to the
+differences between adjacent x-positions 
 (which is also the default here, as in a standard mouse-tracking task with 
 buttons located in the top-left and right corners mostly the movements in the
 horizontal direction are of interest). Besides, they recommend using the 

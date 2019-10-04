@@ -6,6 +6,7 @@
 [![cran
 version](http://www.r-pkg.org/badges/version/mousetrap)](https://CRAN.R-project.org/package=mousetrap)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.596640.svg)](https://doi.org/10.5281/zenodo.596640)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/mousetrap?color=yellow)](https://CRAN.R-project.org/package=mousetrap)
 
 Mouse-tracking, the analysis of mouse movements in computerized
 experiments, is a method that is becoming increasingly popular in the
@@ -57,19 +58,19 @@ If you use the `mousetrap` package in your published research, we kindly
 ask that you cite it as follows:
 
 Kieslich, P. J., Henninger, F., Wulff, D. U., Haslbeck, J. M. B., &
-Schulte-Mecklenbeck, M. (in press). Mouse-tracking: A practical guide to
+Schulte-Mecklenbeck, M. (2019). Mouse-tracking: A practical guide to
 implementation and analysis. In M. Schulte-Mecklenbeck, A. Kühberger, &
-J. G. Johnson (Eds.), *A Handbook of Process Tracing Methods*. New York,
-NY: Routledge.
+J. G. Johnson (Eds.), *A Handbook of Process Tracing Methods*
+(pp. 111-130). New York, NY: Routledge.
 
 Besides, if you use functions for clustering and mapping trajectories,
 please also include the following reference:
 
 Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F., &
-Schulte-Mecklenbeck, M. (in press). Mouse-tracking: Detecting types in
+Schulte-Mecklenbeck, M. (2019). Mouse-tracking: Detecting types in
 movement trajectories. In M. Schulte-Mecklenbeck, A. Kühberger, & J. G.
-Johnson (Eds.), *A Handbook of Process Tracing Methods*. New York, NY:
-Routledge.
+Johnson (Eds.), *A Handbook of Process Tracing Methods* (pp. 131-145).
+New York, NY: Routledge.
 
 ## Acknowledgments
 
