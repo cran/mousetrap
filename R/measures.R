@@ -72,13 +72,21 @@
 #'   (\code{xpos}) and the second to the y-positions (\code{ypos}).
 #' @param timestamps a character string specifying the trajectory dimension
 #'   containing the timestamps.
-#' @param flip_threshold a numeric value specifying the distance that needs to 
+#' @param flip_threshold a numeric value specifying the distance that needs to
 #'   be exceeded in one direction so that a change in direction counts as a
-#'   flip.
+#'   flip. If several thresholds are specified, flips will be returned in
+#'   separate variables for each threshold value (the variable name will be
+#'   suffixed with the threshold value).
 #' @param hover_threshold an optional numeric value. If specified, \code{hovers}
 #'   (and \code{hover_time})  will be calculated as the number (and total time)
 #'   of periods without movement in a trial (whose duration exceeds the value
-#'   specified in \code{hover_threshold}).
+#'   specified in \code{hover_threshold}). If several thresholds are specified,
+#'   hovers and hover_time will be returned in separate variables for each
+#'   threshold value (the variable name will be suffixed with the threshold
+#'   value).
+#' @param hover_incl_initial logical indicating if the calculation of hovers
+#'   should include a potential initial phase in the trial without mouse
+#'   movements (this initial phase is included by default).
 #'   
 #' @return A mousetrap data object (see \link{mt_example}) where an additional 
 #'   \link{data.frame} has been added (by default called "measures") containing 
@@ -190,7 +198,7 @@ mt_measures <- function(
   data,
   use="trajectories", save_as="measures",
   dimensions=c("xpos","ypos"), timestamps="timestamps",
-  flip_threshold=0, hover_threshold=NULL,
+  flip_threshold=0, hover_threshold=NULL, hover_incl_initial=TRUE,
   verbose=FALSE) {
   
   if(length(dimensions)!=2){
@@ -233,14 +241,30 @@ mt_measures <- function(
       "MAD", "MAD_time",
       "MD_above", "MD_above_time",
       "MD_below", "MD_below_time",
-      "AD", "AUC",
-      paste0(dimensions,"_flips"),
+      "AD", "AUC"
+    )
+    
+    if (length(flip_threshold)==1){
+      mt_measures <- c(
+        mt_measures,
+        paste0(dimensions,"_flips")
+      )
+    } else {
+      mt_measures <- c(mt_measures, paste(paste0(dimensions,"_flips"),rep(flip_threshold,each=2),sep="_"))
+    }
+    
+    mt_measures <- c(
+      mt_measures,
       paste0(dimensions,"_reversals"),
       "RT", "initiation_time", "idle_time"
     )
     
     if(!is.null(hover_threshold)){
-      mt_measures <- c(mt_measures, "hover_time", "hovers")
+      if (length(hover_threshold)==1){
+        mt_measures <- c(mt_measures, "hover_time", "hovers")
+      } else {
+        mt_measures <- c(mt_measures, paste(c("hover_time", "hovers"),rep(hover_threshold,each=2),sep="_"))
+      }
     }
     
     # Check if there are trajectories where first timestamp is > 0:
@@ -265,13 +289,27 @@ mt_measures <- function(
       "No timestamps were found in trajectory array. ",
       "Not computing the corresponding measures."
     )
+
     mt_measures <- c(
       paste0(dim1,c("_max","_min")),paste0(dim2,c("_max","_min")),
       "MAD", "MD_above", "MD_below",
-      "AD", "AUC",
-      paste0(dimensions,"_flips"),
+      "AD", "AUC"
+    )
+    
+    if (length(flip_threshold)==1){
+      mt_measures <- c(
+        mt_measures,
+        paste0(dimensions,"_flips")
+      )
+    } else {
+      mt_measures <- c(mt_measures, paste(paste0(dimensions,"_flips"),rep(flip_threshold,each=2),sep="_"))
+    }
+    
+    mt_measures <- c(
+      mt_measures,
       paste0(dimensions,"_reversals")
     )
+    
   }
   
   # Add distance, velocity and acceleration-based measures
@@ -354,9 +392,11 @@ mt_measures <- function(
     
     
     # Calculate number of x_flips and y_flips
-    measures[i,paste0(dim1,"_flips")] <- count_changes(current_dim1, threshold=flip_threshold)
-    measures[i,paste0(dim2,"_flips")] <- count_changes(current_dim2, threshold=flip_threshold)
-    
+    measures[i,grep(paste0(dim1,"_flips"),mt_measures)] <-
+      sapply(flip_threshold,count_changes,pos=current_dim1)
+    measures[i,grep(paste0(dim2,"_flips"),mt_measures)] <-
+      sapply(flip_threshold,count_changes,pos=current_dim2)
+
     # Calculate x_reversals
     # number of crossings of the y-axis (ignoring points exactly on y axis)
     yside <- current_dim1[current_dim1!=0] > 0
@@ -385,8 +425,10 @@ mt_measures <- function(
         measures[i,"initiation_time"] <- current_timestamps[1]
         measures[i,"idle_time"] <- current_timestamps[1]
         if (!is.null(hover_threshold)){
-          measures[i,"hover_time"] <- ifelse(current_timestamps[1]>hover_threshold,current_timestamps[1],0)
-          measures[i,"hovers"] <- 0
+          measures[i,grep("hover_time",mt_measures)] <- 
+            ifelse(current_timestamps[1]>hover_threshold,current_timestamps[1],0)
+          
+          measures[i,grep("hovers",mt_measures)] <- 0
         }
         
       } else if (all(pos_constant == TRUE)) {
@@ -394,8 +436,12 @@ mt_measures <- function(
         measures[i,"initiation_time"] <- measures[i,"RT"]
         measures[i,"idle_time"] <- measures[i,"RT"]
         if (!is.null(hover_threshold)){
-          measures[i,"hover_time"] <- ifelse(measures[i,"RT"]>hover_threshold,measures[i,"RT"],0)
-          measures[i,"hovers"] <- ifelse(measures[i,"RT"]>hover_threshold,1,0)
+          
+          measures[i,grep("hover_time",mt_measures)] <- 
+            ifelse(measures[i,"RT"]>hover_threshold,measures[i,"RT"],0)
+          
+          measures[i,grep("hovers",mt_measures)] <- 
+            ifelse(measures[i,"RT"]>hover_threshold,1,0)
         }
         
       } else {
@@ -423,11 +469,26 @@ mt_measures <- function(
           }
           
           # Calculate number of periods without movement that exceed the threshold and their total time
-          measures[i,"hover_time"] <-  sum(time_diffs[time_diffs>hover_threshold])
-          measures[i,"hovers"] <-  sum(time_diffs>hover_threshold)
+          measures[i,grep("hover_time",mt_measures)] <-
+            sapply(hover_threshold,function(threshold) sum(time_diffs[time_diffs>threshold]))
+          
+          measures[i,grep("hovers",mt_measures)] <-
+            sapply(hover_threshold, function(threshold) sum(time_diffs>threshold))
+          
         }
       
       }
+      
+      if (!is.null(hover_threshold) & (hover_incl_initial==FALSE)){
+        
+        measures[i,grep("hover_time",mt_measures)] <- measures[i,grep("hover_time",mt_measures)]-
+          ifelse(measures[i,"initiation_time"]>hover_threshold,measures[i,"initiation_time"],0)
+        
+        measures[i,grep("hovers",mt_measures)] <- measures[i,grep("hovers",mt_measures)]-
+          ifelse(measures[i,"initiation_time"]>hover_threshold,1,0)
+        
+      }
+      
       
       # notes: timestamps (e.g., for MAD) always correspond
       # to the first time the max/min value was reached

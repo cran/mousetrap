@@ -6,7 +6,8 @@
 \usage{
 mt_measures(data, use = "trajectories", save_as = "measures",
   dimensions = c("xpos", "ypos"), timestamps = "timestamps",
-  flip_threshold = 0, hover_threshold = NULL, verbose = FALSE)
+  flip_threshold = 0, hover_threshold = NULL,
+  hover_incl_initial = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -27,14 +28,23 @@ default), the first value in the vector corresponds to the x-positions
 \item{timestamps}{a character string specifying the trajectory dimension
 containing the timestamps.}
 
-\item{flip_threshold}{a numeric value specifying the distance that needs to 
+\item{flip_threshold}{a numeric value specifying the distance that needs to
 be exceeded in one direction so that a change in direction counts as a
-flip.}
+flip. If several thresholds are specified, flips will be returned in
+separate variables for each threshold value (the variable name will be
+suffixed with the threshold value).}
 
 \item{hover_threshold}{an optional numeric value. If specified, \code{hovers}
 (and \code{hover_time})  will be calculated as the number (and total time)
 of periods without movement in a trial (whose duration exceeds the value
-specified in \code{hover_threshold}).}
+specified in \code{hover_threshold}). If several thresholds are specified,
+hovers and hover_time will be returned in separate variables for each
+threshold value (the variable name will be suffixed with the threshold
+value).}
+
+\item{hover_incl_initial}{logical indicating if the calculation of hovers
+should include a potential initial phase in the trial without mouse
+movements (this initial phase is included by default).}
 
 \item{verbose}{logical indicating whether function should report its
 progress.}
