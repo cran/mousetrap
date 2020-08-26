@@ -4,9 +4,15 @@
 \alias{mt_space_normalize}
 \title{Space normalize trajectories.}
 \usage{
-mt_space_normalize(data, use = "trajectories",
-  save_as = "sn_trajectories", dimensions = c("xpos", "ypos"),
-  start = c(0, 0), end = NULL, verbose = FALSE)
+mt_space_normalize(
+  data,
+  use = "trajectories",
+  save_as = "sn_trajectories",
+  dimensions = c("xpos", "ypos"),
+  start = c(0, 0),
+  end = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -68,7 +74,7 @@ Dale, R., Kehoe, C., & Spivey, M. J. (2007). Graded motor
   \link{mt_remap_symmetric} for remapping trajectories.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

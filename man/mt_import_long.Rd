@@ -4,10 +4,18 @@
 \alias{mt_import_long}
 \title{Import mouse-tracking data saved in long format.}
 \usage{
-mt_import_long(raw_data, xpos_label = "xpos", ypos_label = "ypos",
-  zpos_label = NULL, timestamps_label = "timestamps",
-  add_labels = NULL, mt_id_label = "mt_id", mt_seq_label = "mt_seq",
-  reset_timestamps = TRUE, verbose = TRUE)
+mt_import_long(
+  raw_data,
+  xpos_label = "xpos",
+  ypos_label = "ypos",
+  zpos_label = NULL,
+  timestamps_label = "timestamps",
+  add_labels = NULL,
+  mt_id_label = "mt_id",
+  mt_seq_label = "mt_seq",
+  reset_timestamps = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{raw_data}{a data.frame in long format, containing the raw data.}
@@ -99,7 +107,7 @@ mt_data <- mt_import_long(exp_data,
   mouse-tracking data in other formats.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

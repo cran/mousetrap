@@ -4,9 +4,15 @@
 \alias{mt_time_normalize}
 \title{Time normalize trajectories.}
 \usage{
-mt_time_normalize(data, use = "trajectories",
-  save_as = "tn_trajectories", dimensions = c("xpos", "ypos"),
-  timestamps = "timestamps", nsteps = 101, verbose = FALSE)
+mt_time_normalize(
+  data,
+  use = "trajectories",
+  save_as = "tn_trajectories",
+  dimensions = c("xpos", "ypos"),
+  timestamps = "timestamps",
+  nsteps = 101,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -71,14 +77,14 @@ Spivey, M. J., Grosjean, M., & Knoblich, G. (2005). Continuous
   10393-10398.
 }
 \seealso{
-\link[stats]{approx} for information about the function used for
+\link[stats:approxfun]{approx} for information about the function used for
   linear interpolation.
 
   \link{mt_resample} for resampling trajectories using a constant time
   interval.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

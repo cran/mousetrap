@@ -4,8 +4,13 @@
 \alias{mt_spatialize}
 \title{Spatialize trajectories.}
 \usage{
-mt_spatialize(data, use = "trajectories", dimensions = c("xpos",
-  "ypos"), save_as = "sp_trajectories", n_points = 20)
+mt_spatialize(
+  data,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  save_as = "sp_trajectories",
+  n_points = 20
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -53,7 +58,7 @@ KH2017 <- mt_spatialize(data=KH2017,
 
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 
-Jonas M. B. Haslbeck (\email{jonas.haslbeck@gmail.com})
+Jonas M. B. Haslbeck
 }

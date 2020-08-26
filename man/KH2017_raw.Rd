@@ -4,7 +4,8 @@
 \name{KH2017_raw}
 \alias{KH2017_raw}
 \title{Raw mouse-tracking dataset from Kieslich & Henninger (2017)}
-\format{A \link{data.frame} with 1140 rows and 19 variables. The data.frame is 
+\format{
+A \link{data.frame} with 1140 rows and 19 variables. The data.frame is 
   based on the combined raw data that were created using 
   \link[readbulk]{read_opensesame} from the 
   \href{http://pascalkieslich.github.io/readbulk/}{readbulk} library. For 
@@ -24,7 +25,8 @@
   \code{xpos_get_response} and \code{ypos_get_response} indicate that the
   cursor is located in the center of the screen. Both variables increase in
   value as the mouse moves toward the bottom right. Timestamps are given in
-  milliseconds.}
+  milliseconds.
+}
 \usage{
 KH2017_raw
 }
@@ -42,7 +44,7 @@ two categories (e.g., "fish" or "mammal") by clicking on the button
 corresponding to the correct category. All exemplars and categories from the
 original study were translated to and presented in German.
 
-The data was collected in \href{http://osdoc.cogsci.nl/}{OpenSesame} using
+The data was collected in \href{https://osdoc.cogsci.nl/}{OpenSesame} using
 the \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin} 
 (Kieslich & Henninger, 2017).
 

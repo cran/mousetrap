@@ -4,8 +4,14 @@
 \alias{scale_within}
 \title{Scale and center variables within the levels of another variable.}
 \usage{
-scale_within(data, variables = NULL, within = NULL, prefix = "",
-  center = TRUE, scale = TRUE)
+scale_within(
+  data,
+  variables = NULL,
+  within = NULL,
+  prefix = "",
+  center = TRUE,
+  scale = TRUE
+)
 }
 \arguments{
 \item{data}{a \link{data.frame}.}
@@ -50,7 +56,7 @@ ChickWeight_scaled <-  scale_within(
    \link{mt_standardize} for standardizing measures in a mousetrap data object.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

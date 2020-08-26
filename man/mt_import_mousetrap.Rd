@@ -4,10 +4,19 @@
 \alias{mt_import_mousetrap}
 \title{Import mouse-tracking data recorded using the mousetrap plug-ins in OpenSesame.}
 \usage{
-mt_import_mousetrap(raw_data, xpos_label = "xpos", ypos_label = "ypos",
-  timestamps_label = "timestamps", mt_id_label = NULL, split = ",",
-  duplicates = "remove_first", reset_timestamps = TRUE,
-  verbose = FALSE)
+mt_import_mousetrap(
+  raw_data,
+  xpos_label = "xpos",
+  ypos_label = "ypos",
+  timestamps_label = "timestamps",
+  mt_id_label = NULL,
+  split = ",",
+  duplicates = "remove_first",
+  unordered = "warn",
+  reset_timestamps = TRUE,
+  digits = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{raw_data}{a data.frame containing the raw data.}
@@ -36,9 +45,17 @@ coordinates within a trial are separated.}
 \item{duplicates}{a character string indicating how duplicate timestamps
 within a trial are handled (see Details).}
 
+\item{unordered}{a character string indicating how unordered (i.e.,
+non-monotonically increasing) timestamps within a trial are handled (see
+Details).}
+
 \item{reset_timestamps}{logical indicating if the first timestamp should be
 subtracted from all timestamps within a trial. Default is \code{TRUE} as it
 is recommended for all following analyses in mousetrap.}
+
+\item{digits}{an optional integer. If specified, timestamps will be rounded.
+Potentially useful if timestamps are recorded with submillisecond
+precision.}
 
 \item{verbose}{logical indicating whether function should report its
 progress.}
@@ -52,7 +69,7 @@ A mousetrap data object (see \link{mt_example}).
 \description{
 \code{mt_import_mousetrap} accepts a data.frame of (merged) raw data from a 
 mouse-tracking experiment implemented in 
-\href{http://osdoc.cogsci.nl/}{OpenSesame} using the 
+\href{https://osdoc.cogsci.nl/}{OpenSesame} using the 
 \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin} 
 (Kieslich & Henninger, 2017). From this data.frame, 
 \code{mt_import_mousetrap} creates a mousetrap data object containing the 
@@ -88,10 +105,21 @@ these cases will be ignored (this covers the special case that, e.g.,
 other trials).
 
 \code{duplicates} allows for different options to handle duplicate timestamps
-within a trial: \itemize{ \item{\code{remove_first}: First timestamp and
-corresponding x-/y-positions are removed (the default).}
+within a trial: \itemize{
+\item{\code{remove_first}: First timestamp and corresponding x-/y-positions
+are removed (the default).}
 \item{\code{remove_last}: Last timestamp and corresponding x-/y-positions are
-removed.} \item{\code{ignore}: Duplicates are kept.} }
+removed.}
+\item{\code{ignore}: Duplicates are kept.} }
+
+\code{unordered} allows for different options to handle unordered, that is,
+non-monotonically increasing timestamps within a trial: \itemize{
+\item{\code{warn}: A warning is issued if unordered timestamps are
+encountered in a trial (the default).}
+\item{\code{remove}: Unordered timestamps within a trial are removed. This
+means that any timestamp that is smaller than its predecessor will be removed
+along with the corresponding x-/y-position.}
+\item{\code{ignore}: Unordered timestamps are kept and no warning is issued.} }
 }
 \examples{
 mt_data <- mt_import_mousetrap(mt_example_raw)
@@ -111,7 +139,7 @@ Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An
 data from other sources.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

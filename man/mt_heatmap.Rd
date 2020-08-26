@@ -4,9 +4,16 @@
 \alias{mt_heatmap}
 \title{Plot trajectory heatmap.}
 \usage{
-mt_heatmap(x, use = "trajectories", dimensions = c("xpos", "ypos"),
-  filename = NULL, ..., upscale = 1, plot_dims = FALSE,
-  verbose = TRUE)
+mt_heatmap(
+  x,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  filename = NULL,
+  ...,
+  upscale = 1,
+  plot_dims = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{usually an object of class \code{mousetrap}. Alternatively, a
@@ -22,7 +29,7 @@ y-coordinates, the third, if provided, will be added as color information.}
 \item{filename}{a character string giving the name of the file. If 
 \code{NULL} (the default), the R standard device is used for plotting.
 Otherwise, the plotting device is inferred from the file extension. Only
-supports devices \link[grDevices]{tiff}, \link[grDevices]{png},
+supports devices \link[grDevices:png]{tiff}, \link[grDevices]{png},
 \link[grDevices]{pdf}.}
 
 \item{...}{arguments passed to \link{mt_heatmap_raw}.}
@@ -42,7 +49,7 @@ function has beta status.
 }
 \details{
 \code{mt_heatmap} wraps \link{mt_heatmap_raw} and provides direct plotting 
-output in \link[grDevices]{tiff}, \link[grDevices]{png},
+output in \link[grDevices:png]{tiff}, \link[grDevices]{png},
 \link[grDevices]{pdf}, or R's default window output. For further details on
 how the trajectory heatmaps are constructed, see \link{mt_heatmap_raw}.
 }
@@ -70,5 +77,5 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 }

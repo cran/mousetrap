@@ -4,9 +4,16 @@
 \alias{mt_distmat}
 \title{Compute distance matrix.}
 \usage{
-mt_distmat(data, use = "sp_trajectories", save_as = "distmat",
-  dimensions = c("xpos", "ypos"), weights = rep(1, length(dimensions)),
-  pointwise = TRUE, minkowski_p = 2, na_rm = FALSE)
+mt_distmat(
+  data,
+  use = "sp_trajectories",
+  save_as = "distmat",
+  dimensions = c("xpos", "ypos"),
+  weights = rep(1, length(dimensions)),
+  pointwise = TRUE,
+  minkowski_p = 2,
+  na_rm = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -76,7 +83,7 @@ mt_example <- mt_distmat(mt_example, use="sp_trajectories")
 
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 
-Jonas M. B. Haslbeck (\email{jonas.haslbeck@gmail.com})
+Jonas M. B. Haslbeck
 }

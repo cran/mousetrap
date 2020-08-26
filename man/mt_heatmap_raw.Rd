@@ -4,13 +4,28 @@
 \alias{mt_heatmap_raw}
 \title{Creates high-resolution heatmap of trajectory data.}
 \usage{
-mt_heatmap_raw(data, use = "trajectories", dimensions = c("xpos",
-  "ypos"), variable = NULL, bounds = NULL, xres = 1000,
-  upsample = 1, norm = FALSE, colors = c("black", "blue", "white"),
-  n_shades = c(1000, 1000), smooth_radius = 1.5, low_pass = 200,
-  auto_enhance = TRUE, mean_image = 0.15, mean_color = 0.25,
-  aggregate_lwd = 0, aggregate_col = "black", n_trajectories = NULL,
-  seed = NULL, verbose = TRUE)
+mt_heatmap_raw(
+  data,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  variable = NULL,
+  bounds = NULL,
+  xres = 1000,
+  upsample = 1,
+  norm = FALSE,
+  colors = c("black", "blue", "white"),
+  n_shades = c(1000, 1000),
+  smooth_radius = 1.5,
+  low_pass = 200,
+  auto_enhance = TRUE,
+  mean_image = 0.15,
+  mean_color = 0.25,
+  aggregate_lwd = 0,
+  aggregate_col = "black",
+  n_trajectories = NULL,
+  seed = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -140,5 +155,5 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 }

@@ -4,8 +4,7 @@
 \alias{mt_count}
 \title{Count number of observations.}
 \usage{
-mt_count(data, use = "trajectories", save_as = "measures",
-  dimensions = "xpos")
+mt_count(data, use = "trajectories", save_as = "measures", dimensions = "xpos")
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -44,5 +43,5 @@ mt_count(mt_example$trajectories)
 
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 }

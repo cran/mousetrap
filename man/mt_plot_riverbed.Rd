@@ -4,9 +4,18 @@
 \alias{mt_plot_riverbed}
 \title{Plot density of mouse positions across time steps.}
 \usage{
-mt_plot_riverbed(data, use = "tn_trajectories", y = "xpos",
-  y_range = NULL, y_bins = 250, facet_row = NULL, facet_col = NULL,
-  facet_data = "data", grid_colors = c("gray30", "gray10"))
+mt_plot_riverbed(
+  data,
+  use = "tn_trajectories",
+  y = "xpos",
+  y_range = NULL,
+  y_bins = 250,
+  facet_row = NULL,
+  facet_col = NULL,
+  facet_data = "data",
+  grid_colors = c("gray30", "gray10"),
+  na.rm = FALSE
+)
 }
 \arguments{
 \item{data}{mousetrap data object containing the data to be plotted.}
@@ -43,6 +52,11 @@ grid color(s). If a single value is provided, this will be used as the grid
 color. If a vector of length 2 is provided, the first value will be used as
 the color for the major grid lines, the second value for the minor grid
 lines. If set to \code{NA}, no grid lines are plotted.}
+
+\item{na.rm}{logical specifying whether missing values should be removed.
+This is not done by default, because generally riverbed plots are generated
+from preprocess trajectories (e.g., time-normalized trajectories) that all
+have the same length (i.e., the same number of steps).}
 }
 \description{
 \code{mt_plot_riverbed} creates a plot showing the distribution of one
@@ -55,7 +69,8 @@ been used in previous research to visualize the distribution of x-positions
 per time step (e.g., Scherbaum et al., 2010).
 
 \code{mt_plot_riverbed} usually is applied to time-normalized trajectory data
-as all trajectories must contain the same number of values.
+as all trajectories must contain the same number of values (if
+\code{na.rm=FALSE}, the default).
 }
 \examples{
 # Time-normalize trajectories
@@ -96,7 +111,7 @@ Scherbaum, S., Dshemuchadse, M., Fischer, R., & Goschke, T.
   \link{mt_time_normalize} for time-normalizing trajectories.
 }
 \author{
-Felix Henninger (\email{mailbox@felixhenninger.com})
+Felix Henninger
 
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 }

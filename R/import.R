@@ -2,7 +2,7 @@
 #'
 #' \code{mt_import_mousetrap} accepts a data.frame of (merged) raw data from a 
 #' mouse-tracking experiment implemented in 
-#' \href{http://osdoc.cogsci.nl/}{OpenSesame} using the 
+#' \href{https://osdoc.cogsci.nl/}{OpenSesame} using the 
 #' \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin} 
 #' (Kieslich & Henninger, 2017). From this data.frame, 
 #' \code{mt_import_mousetrap} creates a mousetrap data object containing the 
@@ -37,10 +37,21 @@
 #' other trials).
 #'
 #' \code{duplicates} allows for different options to handle duplicate timestamps
-#' within a trial: \itemize{ \item{\code{remove_first}: First timestamp and
-#' corresponding x-/y-positions are removed (the default).}
+#' within a trial: \itemize{
+#' \item{\code{remove_first}: First timestamp and corresponding x-/y-positions
+#' are removed (the default).}
 #' \item{\code{remove_last}: Last timestamp and corresponding x-/y-positions are
-#' removed.} \item{\code{ignore}: Duplicates are kept.} }
+#' removed.}
+#' \item{\code{ignore}: Duplicates are kept.} }
+#'
+#' \code{unordered} allows for different options to handle unordered, that is,
+#' non-monotonically increasing timestamps within a trial: \itemize{
+#' \item{\code{warn}: A warning is issued if unordered timestamps are
+#' encountered in a trial (the default).}
+#' \item{\code{remove}: Unordered timestamps within a trial are removed. This
+#' means that any timestamp that is smaller than its predecessor will be removed
+#' along with the corresponding x-/y-position.}
+#' \item{\code{ignore}: Unordered timestamps are kept and no warning is issued.} }
 #'
 #' @param raw_data a data.frame containing the raw data.
 #' @param xpos_label a character string specifying the name of the column(s) in
@@ -61,9 +72,15 @@
 #'   coordinates within a trial are separated.
 #' @param duplicates a character string indicating how duplicate timestamps
 #'   within a trial are handled (see Details).
+#' @param unordered a character string indicating how unordered (i.e.,
+#'   non-monotonically increasing) timestamps within a trial are handled (see
+#'   Details).
 #' @param reset_timestamps logical indicating if the first timestamp should be
 #'   subtracted from all timestamps within a trial. Default is \code{TRUE} as it
 #'   is recommended for all following analyses in mousetrap.
+#' @param digits an optional integer. If specified, timestamps will be rounded.
+#'   Potentially useful if timestamps are recorded with submillisecond
+#'   precision.
 #' @param verbose logical indicating whether function should report its
 #'   progress.
 #'
@@ -87,7 +104,7 @@
 #' mt_data <- mt_import_mousetrap(mt_example_raw)
 #'
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
@@ -96,8 +113,11 @@ mt_import_mousetrap <- function(raw_data,
   xpos_label="xpos", ypos_label="ypos",
   timestamps_label="timestamps",
   mt_id_label=NULL,
-  split=",", duplicates="remove_first",
+  split=",",
+  duplicates="remove_first",
+  unordered="warn",
   reset_timestamps=TRUE,
+  digits=NULL,
   verbose=FALSE) {
   
   # Set labels
@@ -260,10 +280,38 @@ mt_import_mousetrap <- function(raw_data,
     current_timestamps <- current_timestamps[1:sum(!is.na(current_timestamps))]
 
     # Check that timestamps are monotonically increasing
-    if (any(diff(current_timestamps) < 0)) {
-      warning(
-        "For some trajectories, timestamps are not monotonically increasing."
-      )
+    if (unordered != "ignore") {
+      
+      if (unordered %in% c("warn", "remove")) {
+        
+        if (any(diff(current_timestamps) < 0)) {
+          if (unordered=="warn"){
+            warning(
+              "Trajectory encountered where timestamps are not monotonically increasing."
+            )
+            
+          } else{
+            current_xpos <- trajectories[i, 1:length(current_timestamps), xpos]
+            current_ypos <- trajectories[i, 1:length(current_timestamps), ypos]
+            trajectories[i,,] <- NA
+            keep <- c(TRUE,diff(current_timestamps) >= 0)
+            current_timestamps <- current_timestamps[keep]
+            trajectories[i,1:length(current_timestamps),timestamps] <- current_timestamps
+            trajectories[i,1:length(current_timestamps),xpos] <- current_xpos[keep]
+            trajectories[i,1:length(current_timestamps),ypos] <- current_ypos[keep]
+            warning(
+              "Trajectory encountered where timestamps are not monotonically increasing. ",
+              "The corresponding timestamps were removed."
+            )
+          }
+        }
+        
+      } else {
+        stop(
+          "Please specify correct value for unordered: ",
+          "warn, remove, or ignore"
+        )
+      }
     }
 
     # Check for duplicates
@@ -323,6 +371,11 @@ mt_import_mousetrap <- function(raw_data,
   # Subtract first timestamp for each trial
   if (reset_timestamps) {
     trajectories[,,timestamps] <- trajectories[,,timestamps] - trajectories[,1,timestamps]
+  }
+  
+  # Round timestamps (optional)
+  if (!is.null(digits)){
+    trajectories[, , timestamps] <- round(trajectories[, , timestamps],digits=digits)
   }
 
   # Drop raw data columns
@@ -414,7 +467,7 @@ mt_import_mousetrap <- function(raw_data,
 #'   timestamps_label="timestamps")
 #' 
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
@@ -666,10 +719,11 @@ mt_import_wide <- function(raw_data,
 #' }
 #' 
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
+#' @importFrom rlang .data
 #' @export
 mt_import_long <- function(raw_data,
   xpos_label="xpos", ypos_label="ypos", zpos_label=NULL,
@@ -718,11 +772,11 @@ mt_import_long <- function(raw_data,
     # Remove mt_seq_label
     raw_data <- raw_data[,colnames(raw_data)!=mt_seq_label]
   }
-
+  
   # Create mt_seq variable
   raw_data <- raw_data %>%
-    dplyr::group_by(mt_id) %>%
-    dplyr::mutate_(.dots = stats::setNames(list("dplyr::row_number()"), "mt_seq")) %>%
+    dplyr::group_by(.data$mt_id) %>%
+    dplyr::mutate(mt_seq=dplyr::row_number()) %>%
     dplyr::ungroup()
 
   # Collect and rename variables
@@ -749,18 +803,18 @@ mt_import_long <- function(raw_data,
 
 
   # Create array for selected variables
-  n_logs <- dplyr::count(raw_data, mt_id)
+  n_logs <- dplyr::count(raw_data, .data$mt_id)
   n_max <- max(n_logs$n)
 
   trajectories <- array(
     dim = c(nrow(n_logs),n_max, length(mt_include)),
     dimnames = list(n_logs$mt_id, NULL, mt_include))
-
+  
   for (var in mt_include) {
     reshaped_data <- raw_data %>%
-      dplyr::select_(.dots=c("mt_id", "mt_seq", var)) %>%
-      tidyr::spread_("mt_seq", var)
-    trajectories[,,var] <- as.matrix(reshaped_data[,-1])
+      dplyr::select(.data$mt_id, .data$mt_seq, {{var}}) %>%
+      tidyr::pivot_wider(id_cols=.data$mt_id,names_from=.data$mt_seq,values_from={{var}})
+      trajectories[,,var] <- as.matrix(reshaped_data[,-1])
     }
 
   # If no timestamps are found in the data, create timestamps

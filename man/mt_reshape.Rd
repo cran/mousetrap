@@ -4,12 +4,23 @@
 \alias{mt_reshape}
 \title{General-purpose reshape and aggregation function for mousetrap data.}
 \usage{
-mt_reshape(data, use = "trajectories", use_variables = NULL,
-  use2 = "data", use2_variables = NULL, subset = NULL,
-  subject_id = NULL, aggregate = FALSE,
-  aggregate_subjects_only = FALSE, .funs = "mean",
-  trajectories_long = TRUE, convert_df = TRUE, mt_id = "mt_id",
-  mt_seq = "mt_seq", aggregation_function = NULL)
+mt_reshape(
+  data,
+  use = "trajectories",
+  use_variables = NULL,
+  use2 = "data",
+  use2_variables = NULL,
+  subset = NULL,
+  subject_id = NULL,
+  aggregate = FALSE,
+  aggregate_subjects_only = FALSE,
+  .funs = "mean",
+  trajectories_long = TRUE,
+  convert_df = TRUE,
+  mt_id = "mt_id",
+  mt_seq = "mt_seq",
+  aggregation_function = NULL
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -38,7 +49,7 @@ be provided directly.}
 variables (in \code{data[[use2]]}) that should be merged with the data. If
 \code{aggregate==TRUE}, the trajectories / measures will be aggregated
 separately for each of the levels of these variables using
-\link[dplyr]{summarize_at}.}
+\link[dplyr:summarise_all]{summarize_at}.}
 
 \item{subset}{a logical expression (passed on to \link{subset}) indicating
 elements or rows to keep. If specified, \code{data[[use2]]} will be
@@ -59,7 +70,7 @@ aggregated per subject (if \code{subject_id} is specified and
 \code{aggregate==TRUE}).}
 
 \item{.funs}{the aggregation function(s) passed on to
-\code{\link[dplyr]{summarize_at}}. By default, the \code{\link{mean}} is
+\code{\link[dplyr:summarise_all]{summarize_at}}. By default, the \code{\link{mean}} is
 calculated.}
 
 \item{trajectories_long}{logical indicating if the reshaped trajectories
@@ -165,11 +176,11 @@ trajectories_wide <- mt_reshape(mt_example,
 
   \link{mt_export_wide} for exporting mouse-tracking data in wide format.
 
-  \link[dplyr]{inner_join} for merging data and \code{\link[dplyr]{summarize_at}}
+  \link[dplyr:mutate-joins]{inner_join} for merging data and \code{\link[dplyr:summarise_all]{summarize_at}}
   for aggregating data using the \code{dplyr} package.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

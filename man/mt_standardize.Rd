@@ -4,8 +4,15 @@
 \alias{mt_standardize}
 \title{Standardize mouse-tracking measures per level of other variables.}
 \usage{
-mt_standardize(data, use = "measures", use_variables = NULL,
-  within = NULL, prefix = "z_", center = TRUE, scale = TRUE)
+mt_standardize(
+  data,
+  use = "measures",
+  use_variables = NULL,
+  within = NULL,
+  prefix = "z_",
+  center = TRUE,
+  scale = TRUE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -65,7 +72,7 @@ mt_example <- mt_standardize(mt_example,
   \link{scale} for the R base scale function.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

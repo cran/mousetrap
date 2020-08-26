@@ -4,11 +4,19 @@
 \alias{mt_map}
 \title{Map trajectories to prototypes.}
 \usage{
-mt_map(data, use = "sp_trajectories", save_as = "prototyping",
+mt_map(
+  data,
+  use = "sp_trajectories",
+  save_as = "prototyping",
   dimensions = c("xpos", "ypos"),
-  prototypes = mousetrap::mt_prototypes, weights = rep(1,
-  length(dimensions)), pointwise = TRUE, na_rm = FALSE,
-  minkowski_p = 2, use2 = "data", grouping_variables = NULL)
+  prototypes = mousetrap::mt_prototypes,
+  weights = rep(1, length(dimensions)),
+  pointwise = TRUE,
+  na_rm = FALSE,
+  minkowski_p = 2,
+  use2 = "data",
+  grouping_variables = NULL
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -159,9 +167,9 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
   Manuscript in preparation.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 
-Jonas M. B. Haslbeck (\email{jonas.haslbeck@gmail.com})
+Jonas M. B. Haslbeck
 
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 }

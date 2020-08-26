@@ -3,7 +3,6 @@
 \docType{package}
 \name{mousetrap}
 \alias{mousetrap}
-\alias{mousetrap-package}
 \title{Process and analyze mouse-tracking data}
 \description{
 The mousetrap package provides functions for importing, preprocessing, 
@@ -15,7 +14,7 @@ following, a brief overview of the functions in this package is given.
   
   Depending on the file format, one of the standard R functions for reading 
   files into R can be used (e.g., \link[utils]{read.table} or 
-  \link[utils]{read.csv}).
+  \link[utils:read.table]{read.csv}).
 
   If raw data were collected using
   \href{http://www.mousetracker.org/}{MouseTracker}, the mousetrap package 
@@ -25,7 +24,7 @@ following, a brief overview of the functions in this package is given.
   \link[readbulk]{read_bulk} function from the 
   \href{http://pascalkieslich.github.io/readbulk/}{readbulk} package can be
   used (or the \link[readbulk]{read_opensesame} function, if data were 
-  collected using \href{http://osdoc.cogsci.nl/}{OpenSesame}).
+  collected using \href{https://osdoc.cogsci.nl/}{OpenSesame}).
 }
 
 \section{Import functions}{
@@ -38,7 +37,7 @@ following, a brief overview of the functions in this package is given.
 
   \link{mt_import_mousetrap} imports mouse-tracking data that were recorded 
   using the \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap
-  plugin} for \href{http://osdoc.cogsci.nl/}{OpenSesame}.
+  plugin} for \href{https://osdoc.cogsci.nl/}{OpenSesame}.
 
   \link{mt_import_wide} imports mouse-tracking data saved in a wide format 
   (e.g., data collected using

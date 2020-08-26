@@ -4,11 +4,22 @@
 \alias{mt_cluster}
 \title{Cluster trajectories.}
 \usage{
-mt_cluster(data, use = "sp_trajectories", save_as = "clustering",
-  dimensions = c("xpos", "ypos"), n_cluster = 5, method = "hclust",
-  weights = rep(1, length(dimensions)), pointwise = TRUE,
-  minkowski_p = 2, hclust_method = "ward.D", kmeans_nstart = 10,
-  na_rm = FALSE, cluster_output = FALSE, verbose = FALSE)
+mt_cluster(
+  data,
+  use = "sp_trajectories",
+  save_as = "clustering",
+  dimensions = c("xpos", "ypos"),
+  n_cluster = 5,
+  method = "hclust",
+  weights = rep(1, length(dimensions)),
+  pointwise = TRUE,
+  minkowski_p = 2,
+  hclust_method = "ward.D",
+  kmeans_nstart = 10,
+  na_rm = FALSE,
+  cluster_output = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -151,7 +162,7 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
   \link{mt_cluster_k} for estimating the optimal number of clusters.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 
-Jonas M. B. Haslbeck (\email{jonas.haslbeck@gmail.com})
+Jonas M. B. Haslbeck
 }

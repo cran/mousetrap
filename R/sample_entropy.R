@@ -71,7 +71,7 @@
 #'   dimension="xpos", m=3)
 #' 
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Dirk Wulff
 #' 

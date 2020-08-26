@@ -59,7 +59,7 @@
 #'   variables (in \code{data[[use2]]}) that should be merged with the data. If
 #'   \code{aggregate==TRUE}, the trajectories / measures will be aggregated
 #'   separately for each of the levels of these variables using
-#'   \link[dplyr]{summarize_at}.
+#'   \link[dplyr:summarise_all]{summarize_at}.
 #' @param subset a logical expression (passed on to \link{subset}) indicating
 #'   elements or rows to keep. If specified, \code{data[[use2]]} will be
 #'   subsetted using this expression, and, afterwards, \code{data[[use]]} will
@@ -75,7 +75,7 @@
 #'   aggregated per subject (if \code{subject_id} is specified and
 #'   \code{aggregate==TRUE}).
 #' @param .funs the aggregation function(s) passed on to
-#'   \code{\link[dplyr]{summarize_at}}. By default, the \code{\link{mean}} is
+#'   \code{\link[dplyr:summarise_all]{summarize_at}}. By default, the \code{\link{mean}} is
 #'   calculated.
 #' @param trajectories_long logical indicating if the reshaped trajectories
 #'   should be returned in long or wide format. If \code{TRUE}, every recorded
@@ -115,7 +115,7 @@
 #'
 #'   \link{mt_export_wide} for exporting mouse-tracking data in wide format.
 #'
-#'   \link[dplyr]{inner_join} for merging data and \code{\link[dplyr]{summarize_at}}
+#'   \link[dplyr:mutate-joins]{inner_join} for merging data and \code{\link[dplyr:summarise_all]{summarize_at}}
 #'   for aggregating data using the \code{dplyr} package.
 #'
 #'
@@ -140,10 +140,11 @@
 #'   )
 #'
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
+#' @importFrom rlang .data
 #' @export
 mt_reshape <- function(data,
   use="trajectories", use_variables=NULL,
@@ -297,14 +298,19 @@ mt_reshape <- function(data,
         )
       }
     }
-
+    
     # If subject variable is specified, always aggregate within subjects first
     if (is.null(subject_id) == FALSE) {
 
       grouping_variables <- c(subject_id, use2_variables, mt_seq)
 
-      dataset <- dplyr::group_by_(dataset, .dots=grouping_variables)
-      dataset <- dplyr::summarize_at(dataset, .funs=.funs, .vars=use_variables)
+      dataset <- dataset %>%
+        dplyr::group_by(dplyr::across({{grouping_variables}})) %>%
+        dplyr::summarize_at(.funs=.funs, .vars=use_variables) %>%
+        # alternative implementation as summarize_at is superseded (if this implementation
+        # is used, the .funs input needs to be changed, e.g., to .funs=mean):
+        # dplyr::summarize(dplyr::across({{use_variables}},.fns = .funs)) %>% 
+        dplyr::ungroup()
 
       if (aggregate_subjects_only == FALSE){
         if(length(.funs) > 1) {
@@ -324,24 +330,31 @@ mt_reshape <- function(data,
       # Optionally group data
       grouping_variables <- c(use2_variables, mt_seq)
       if(is.null(grouping_variables) == FALSE) {
-        dataset <- dplyr::group_by_(dataset, .dots=grouping_variables)
+        dataset <- dplyr::group_by(dataset, dplyr::across({{grouping_variables}}))
       }
 
       # Perform aggregation
       dataset <- dplyr::summarize_at(dataset, .funs=.funs, .vars=use_variables)
+      # alternative implementation as summarize_at is superseded (if this implementation
+      # is used, the .funs input needs to be changed, e.g., to .funs=mean):
+      # dataset <- dplyr::summarize(dataset, dplyr::across({{use_variables}},.fns = .funs))
+      
+      if(is.null(grouping_variables) == FALSE) {
+        dataset <- dplyr::ungroup(dataset)
+      }
 
     }
   }
 
   # Convert to wide format if specified
   if (trajectories_long == FALSE) {
-
-    dataset <- tidyr::gather_(dataset, key_col="key", value_col="val", gather_cols=use_variables)
-    dataset <- tidyr::unite_(dataset, col="key", from=c("key", mt_seq), sep="_")
-    # convert to factor to ensure correct column order
-    dataset$key <- factor(dataset$key, levels=unique(dataset$key))
-    dataset <- tidyr::spread_(dataset, key_col="key", value_col="val")
-
+    dataset <- dataset %>%
+      tidyr::pivot_longer(cols=use_variables) %>%
+      dplyr::arrange(.data$name) %>%
+      tidyr::unite(col="name", .data$name, {{mt_seq}}, sep="_") %>%
+      # convert to factor to ensure correct column order
+      dplyr::mutate(name=factor(.data$name, levels=unique(.data$name))) %>%
+      tidyr::pivot_wider(names_from=.data$name, values_from=.data$value)
   }
 
   if(convert_df) {

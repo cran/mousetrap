@@ -4,10 +4,19 @@
 \alias{mt_import_wide}
 \title{Import mouse-tracking data saved in wide format.}
 \usage{
-mt_import_wide(raw_data, xpos_label = "X", ypos_label = "Y",
-  zpos_label = NULL, timestamps_label = "T", add_labels = NULL,
-  mt_id_label = NULL, pos_sep = "_", pos_ids = NULL,
-  reset_timestamps = TRUE, verbose = TRUE)
+mt_import_wide(
+  raw_data,
+  xpos_label = "X",
+  ypos_label = "Y",
+  zpos_label = NULL,
+  timestamps_label = "T",
+  add_labels = NULL,
+  mt_id_label = NULL,
+  pos_sep = "_",
+  pos_ids = NULL,
+  reset_timestamps = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{raw_data}{a data.frame containing the raw data.}
@@ -110,7 +119,7 @@ studying real-time mental processing using a computer mouse-tracking method.
 mouse-tracking data in other formats.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

@@ -4,11 +4,24 @@
 \alias{mt_diffmap}
 \title{Creates a difference-heatmap of two trajectory heatmap images.}
 \usage{
-mt_diffmap(x, y = NULL, condition = NULL, use = "trajectories",
-  dimensions = c("xpos", "ypos"), use2 = "data", filename = NULL,
-  bounds = NULL, xres = 500, upscale = 4, smooth_radius = 10,
-  colors = c("#00863F", "#000000", "#FF1900"), n_shades = 1000,
-  plot = TRUE, ..., verbose = TRUE)
+mt_diffmap(
+  x,
+  y = NULL,
+  condition = NULL,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  use2 = "data",
+  filename = NULL,
+  bounds = NULL,
+  xres = 500,
+  upscale = 4,
+  smooth_radius = 10,
+  colors = c("#00863F", "#000000", "#FF1900"),
+  n_shades = 1000,
+  plot = TRUE,
+  ...,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{an object of class \code{mousetrap}), a trajectory object of class 
@@ -42,7 +55,7 @@ contain the condition variable can be found. Defaults to "data" as
 \item{filename}{a character string giving the name of the file. If 
 \code{NULL} (the default), the R standard device is used for plotting.
 Otherwise, the plotting device is inferred from the file extension. Only
-supports devices \link[grDevices]{tiff}, \link[grDevices]{png},
+supports devices \link[grDevices:png]{tiff}, \link[grDevices]{png},
 \link[grDevices]{pdf}.}
 
 \item{bounds}{numeric vector specifying the corners (xmin, ymin, xmax, ymax) 
@@ -111,7 +124,7 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
 heatmaps.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 
 Pascal J. Kieslich
 }

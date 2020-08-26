@@ -76,7 +76,7 @@
 #' @param seed an optional integer specifying the seed used for the trajectory 
 #'   sampling.
 #' 
-#' @author Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
+#' @author Dirk U. Wulff
 #' 
 #' @return An object of class \code{mt_object_raw} containing in a matrix format
 #'   the image's pixel information, the aggregate trajectory, and the colors.
@@ -430,7 +430,7 @@ mt_heatmap_raw <- function(
 #' function has beta status.
 #' 
 #' \code{mt_heatmap} wraps \link{mt_heatmap_raw} and provides direct plotting 
-#' output in \link[grDevices]{tiff}, \link[grDevices]{png},
+#' output in \link[grDevices:png]{tiff}, \link[grDevices]{png},
 #' \link[grDevices]{pdf}, or R's default window output. For further details on
 #' how the trajectory heatmaps are constructed, see \link{mt_heatmap_raw}.
 #' 
@@ -440,7 +440,7 @@ mt_heatmap_raw <- function(
 #' @param filename a character string giving the name of the file. If 
 #'   \code{NULL} (the default), the R standard device is used for plotting.
 #'   Otherwise, the plotting device is inferred from the file extension. Only
-#'   supports devices \link[grDevices]{tiff}, \link[grDevices]{png},
+#'   supports devices \link[grDevices:png]{tiff}, \link[grDevices]{png},
 #'   \link[grDevices]{pdf}.
 #' @param ... arguments passed to \link{mt_heatmap_raw}.
 #' @param upscale a numeric value by which the output resolution of the image is
@@ -453,7 +453,7 @@ mt_heatmap_raw <- function(
 #'
 #'   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 #' 
-#' @author Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
+#' @author Dirk U. Wulff
 #' 
 #' @references Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
 #'   & Schulte-Mecklenbeck, M. (2019). Mouse-tracking: Detecting types in
@@ -626,7 +626,7 @@ mt_heatmap <- function(
 #' @param ... arguments passed to \link{mt_heatmap_raw}.
 #' 
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #'
 #' Felix Henninger
 #'
@@ -723,7 +723,7 @@ mt_heatmap_ggplot <- function(data,
     ggplot2::scale_y_continuous(
       expand=c(0,0), limits=range(plot_data$y)
     ) +
-    ggplot2::geom_raster(
+    ggplot2::geom_tile(
       fill=plot_data$col
     ) +
     ggplot2::theme(
@@ -806,7 +806,7 @@ print.mt_heatmap_raw = function(x,...){
 #' @param ... arguments passed to \link{mt_heatmap_raw}.
 #'
 #' @author
-#' Dirk U. Wulff (\email{dirk.wulff@@gmail.com})
+#' Dirk U. Wulff
 #'
 #' Pascal J. Kieslich
 #' 

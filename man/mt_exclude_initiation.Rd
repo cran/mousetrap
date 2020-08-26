@@ -4,9 +4,15 @@
 \alias{mt_exclude_initiation}
 \title{Exclude initial phase without mouse movement.}
 \usage{
-mt_exclude_initiation(data, use = "trajectories", save_as = use,
-  dimensions = c("xpos", "ypos"), timestamps = "timestamps",
-  reset_timestamps = TRUE, verbose = FALSE)
+mt_exclude_initiation(
+  data,
+  use = "trajectories",
+  save_as = use,
+  dimensions = c("xpos", "ypos"),
+  timestamps = "timestamps",
+  reset_timestamps = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -67,7 +73,7 @@ mt_example <- mt_exclude_initiation(mt_example,
 \link{mt_measures} for calculating the initiation time.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

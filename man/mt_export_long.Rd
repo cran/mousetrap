@@ -5,11 +5,23 @@
 \alias{mt_export_wide}
 \title{Export mouse-tracking data.}
 \usage{
-mt_export_long(data, use = "trajectories", use_variables = NULL,
-  use2 = "data", use2_variables = NULL, ...)
+mt_export_long(
+  data,
+  use = "trajectories",
+  use_variables = NULL,
+  use2 = "data",
+  use2_variables = NULL,
+  ...
+)
 
-mt_export_wide(data, use = "trajectories", use_variables = NULL,
-  use2 = "data", use2_variables = NULL, ...)
+mt_export_wide(
+  data,
+  use = "trajectories",
+  use_variables = NULL,
+  use2 = "data",
+  use2_variables = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -75,7 +87,7 @@ mt_data_wide <- mt_export_wide(mt_example,
   format.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

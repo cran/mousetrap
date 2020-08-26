@@ -5,15 +5,45 @@
 \alias{mt_plot_aggregate}
 \title{Plot trajectory data.}
 \usage{
-mt_plot(data, use = "trajectories", use2 = "data", x = "xpos",
-  y = "ypos", color = NULL, linetype = NULL, alpha = NA,
-  size = 0.5, facet_row = NULL, facet_col = NULL, points = FALSE,
-  only_ggplot = FALSE, mt_id = "mt_id", ...)
+mt_plot(
+  data,
+  use = "trajectories",
+  use2 = "data",
+  x = "xpos",
+  y = "ypos",
+  color = NULL,
+  linetype = NULL,
+  alpha = NA,
+  size = 0.5,
+  facet_row = NULL,
+  facet_col = NULL,
+  wrap_var = NULL,
+  wrap_ncol = NULL,
+  points = FALSE,
+  only_ggplot = FALSE,
+  mt_id = "mt_id",
+  ...
+)
 
-mt_plot_aggregate(data, use = "trajectories", use2 = "data",
-  x = "xpos", y = "ypos", color = NULL, linetype = NULL,
-  alpha = NA, size = 0.5, facet_row = NULL, facet_col = NULL,
-  points = FALSE, only_ggplot = FALSE, subject_id = NULL, ...)
+mt_plot_aggregate(
+  data,
+  use = "trajectories",
+  use2 = "data",
+  x = "xpos",
+  y = "ypos",
+  color = NULL,
+  linetype = NULL,
+  alpha = NA,
+  size = 0.5,
+  facet_row = NULL,
+  facet_col = NULL,
+  wrap_var = NULL,
+  wrap_ncol = NULL,
+  points = FALSE,
+  only_ggplot = FALSE,
+  subject_id = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -56,6 +86,12 @@ the plotted trajectory lines.}
 
 \item{facet_col}{an optional character string specifying a variable in 
 \code{data[[use2]]} that should be used for (column-wise) faceting.}
+
+\item{wrap_var}{an optional character string specifying variable(s) in 
+\code{data[[use2]]} that should be used for wrapping.}
+
+\item{wrap_ncol}{an optional integer specifying the number of columns if
+wrapping is used.}
 
 \item{points}{logical. If \code{TRUE}, points will be added to the plot using
 \link[ggplot2]{geom_point}.}
@@ -192,7 +228,7 @@ mt_plot(KH2017, use="tn_trajectories", only_ggplot=TRUE) +
   individual pdf files.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

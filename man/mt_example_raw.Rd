@@ -4,7 +4,8 @@
 \name{mt_example_raw}
 \alias{mt_example_raw}
 \title{Raw mouse-tracking dataset for demonstrations of the mousetrap package}
-\format{A \link{data.frame} with 38 rows and 19 variables. The data.frame is 
+\format{
+A \link{data.frame} with 38 rows and 19 variables. The data.frame is 
   based on the combined raw data that were created using 
   \link[readbulk]{read_opensesame} from the 
   \href{http://pascalkieslich.github.io/readbulk/}{readbulk} library. For 
@@ -26,13 +27,14 @@
   \code{xpos_get_response} and \code{ypos_get_response} indicate that the
   cursor is located in the center of the screen. Both variables increase in
   value as the mouse moves toward the bottom right. Timestamps are given in
-  milliseconds.}
+  milliseconds.
+}
 \usage{
 mt_example_raw
 }
 \description{
 An exemplary mouse-tracking dataset collected 
-\href{http://osdoc.cogsci.nl/}{OpenSesame} using the 
+\href{https://osdoc.cogsci.nl/}{OpenSesame} using the 
 \href{https://github.com/pascalkieslich/mousetrap-os}{mousetrap plugin} 
 (Kieslich & Henninger, 2017). A preprocessed (as opposed to raw) version of
 the same data can be found in \link{mt_example}.

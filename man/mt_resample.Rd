@@ -4,10 +4,17 @@
 \alias{mt_resample}
 \title{Resample trajectories using a constant time interval.}
 \usage{
-mt_resample(data, use = "trajectories", save_as = "rs_trajectories",
-  dimensions = c("xpos", "ypos"), timestamps = "timestamps",
-  step_size = 10, exact_last_timestamp = TRUE,
-  constant_interpolation = NULL, verbose = FALSE)
+mt_resample(
+  data,
+  use = "trajectories",
+  save_as = "rs_trajectories",
+  dimensions = c("xpos", "ypos"),
+  timestamps = "timestamps",
+  step_size = 10,
+  exact_last_timestamp = TRUE,
+  constant_interpolation = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -86,7 +93,7 @@ mt_example <- mt_resample(mt_example,
 
 }
 \seealso{
-\link[stats]{approx} for information about the function used for
+\link[stats:approxfun]{approx} for information about the function used for
   linear interpolation.
 
   \link{mt_average} for averaging trajectories across constant time intervals.
@@ -94,7 +101,7 @@ mt_example <- mt_resample(mt_example,
   \link{mt_time_normalize} for time-normalizing trajectories.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

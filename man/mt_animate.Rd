@@ -4,14 +4,33 @@
 \alias{mt_animate}
 \title{Create gif trajectory animation.}
 \usage{
-mt_animate(data, use = "trajectories", dimensions = c("xpos", "ypos"),
-  timestamps = "timestamps", filename = "trajectory_animation.gif",
-  xres = 1000, seconds = 3, framerate = 24, speed = 0.5,
-  density = 3, jitter = TRUE, remove = FALSE, bg = "black",
-  col = "white", lwd = 1, loop = FALSE, bounds = NULL,
-  norm = FALSE, upscale = 1, decay = 10, max_intensity = 5,
-  discard_images = TRUE, im_path = NULL, parallel = TRUE,
-  verbose = FALSE)
+mt_animate(
+  data,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  timestamps = "timestamps",
+  filename = "trajectory_animation.gif",
+  xres = 1000,
+  seconds = 3,
+  framerate = 24,
+  speed = 0.5,
+  density = 3,
+  jitter = TRUE,
+  remove = FALSE,
+  bg = "black",
+  col = "white",
+  lwd = 1,
+  loop = FALSE,
+  bounds = NULL,
+  norm = FALSE,
+  upscale = 1,
+  decay = 10,
+  max_intensity = 5,
+  discard_images = TRUE,
+  im_path = NULL,
+  parallel = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -54,7 +73,7 @@ x 10 x 24 x .5 = 1200 trajectories.}
 
 \item{jitter}{logical specifying whether the density should be jittered. If 
 \code{TRUE}, \code{density} varies according to
-\link[stats]{rgeom}(\code{1/density}).}
+\link[stats:Geometric]{rgeom} (\code{1/density}).}
 
 \item{remove}{logical specifying whether trajectories that reached their end 
 points should be removed from the rest of the animation. Defaults to 
@@ -110,7 +129,7 @@ Windows (see Details and Examples).}
 
 \item{parallel}{logical specifying whether the temporary \emph{.png} images
 should be created using parallel processing (uses
-\link[parallel]{clusterApplyLB}). Process will be run on the maximum
+\link[parallel:clusterApply]{clusterApplyLB}). Process will be run on the maximum
 number of available cores (as determined by \link[parallel]{detectCores}).}
 
 \item{verbose}{logical indicating whether function should report its 
@@ -175,5 +194,5 @@ mt_animate(mt_example,filename = "MyMovie.gif",
 
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 }

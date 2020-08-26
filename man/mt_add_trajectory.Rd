@@ -4,8 +4,15 @@
 \alias{mt_add_trajectory}
 \title{Add new trajectory to trajectory array.}
 \usage{
-mt_add_trajectory(data, use = "trajectories", save_as = use,
-  xpos = NULL, ypos = NULL, xypos = NULL, id = "new")
+mt_add_trajectory(
+  data,
+  use = "trajectories",
+  save_as = use,
+  xpos = NULL,
+  ypos = NULL,
+  xypos = NULL,
+  id = "new"
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -45,7 +52,7 @@ mt_prototypes_ext <- mt_add_trajectory(mt_prototypes,
 
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

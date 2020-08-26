@@ -4,9 +4,15 @@
 \alias{mt_angles}
 \title{Calculate movement angles.}
 \usage{
-mt_angles(data, use = "trajectories", dimensions = c("xpos", "ypos"),
-  save_as = use, na_replace = FALSE, unit = "radian",
-  verbose = FALSE)
+mt_angles(
+  data,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  save_as = use,
+  na_replace = FALSE,
+  unit = "radian",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -78,5 +84,5 @@ mt_example <- mt_angles(mt_example,
 
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 }

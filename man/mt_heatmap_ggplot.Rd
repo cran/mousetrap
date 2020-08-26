@@ -4,8 +4,15 @@
 \alias{mt_heatmap_ggplot}
 \title{Plot trajectory heatmap using ggplot.}
 \usage{
-mt_heatmap_ggplot(data, use = "trajectories", dimensions = c("xpos",
-  "ypos"), use2 = "data", facet_row = NULL, facet_col = NULL, ...)
+mt_heatmap_ggplot(
+  data,
+  use = "trajectories",
+  dimensions = c("xpos", "ypos"),
+  use2 = "data",
+  facet_row = NULL,
+  facet_col = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import
@@ -67,7 +74,7 @@ Wulff, D. U., Haslbeck, J. M. B., Kieslich, P. J., Henninger, F.,
   \link{mt_diffmap} for plotting trajectory difference-heatmaps.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 

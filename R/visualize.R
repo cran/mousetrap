@@ -59,6 +59,10 @@
 #'   \code{data[[use2]]} that should be used for (row-wise) faceting.
 #' @param facet_col an optional character string specifying a variable in 
 #'   \code{data[[use2]]} that should be used for (column-wise) faceting.
+#' @param wrap_var an optional character string specifying variable(s) in 
+#'   \code{data[[use2]]} that should be used for wrapping.
+#' @param wrap_ncol an optional integer specifying the number of columns if
+#'   wrapping is used.
 #' @param points logical. If \code{TRUE}, points will be added to the plot using
 #'   \link[ggplot2]{geom_point}.
 #' @param only_ggplot logical. If \code{TRUE}, only the ggplot object without
@@ -150,7 +154,7 @@
 #' }
 #'
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
@@ -162,11 +166,16 @@ mt_plot <- function(data,
   color=NULL, linetype=NULL,
   alpha = NA, size = 0.5,
   facet_row=NULL, facet_col=NULL,
+  wrap_var=NULL, wrap_ncol=NULL,
   points=FALSE,
   only_ggplot=FALSE, mt_id="mt_id", ...) {
+  
+  if((!is.null(facet_row) | !is.null(facet_col))& !is.null(wrap_var)) {
+    stop("wrap_var cannot be used in combination with facet_row and facet_col.")
+  }
 
   # Extract plotting options from metadata
-  use2_variables <- c(color, linetype, facet_row, facet_col)
+  use2_variables <- c(color, linetype, facet_row, facet_col, wrap_var)
 
   # Merge tracking data with metadata
   # and reshape it into long format
@@ -199,6 +208,11 @@ mt_plot <- function(data,
     facet_formula <- stats::as.formula(paste(facet_row,facet_col,sep="~"))
     current_plot <- current_plot + ggplot2::facet_grid(facet_formula)
   }
+  
+  # Add wrapping (optional)
+  if(is.null(wrap_var)==FALSE) {
+    current_plot <- current_plot + ggplot2::facet_wrap(facets=wrap_var, ncol=wrap_ncol)
+  }
 
   if (only_ggplot == TRUE) {
     # Return empty plot object
@@ -229,11 +243,16 @@ mt_plot_aggregate <- function(data,
   x="xpos", y="ypos", color=NULL, linetype=NULL,
   alpha = NA, size = 0.5,
   facet_row=NULL, facet_col=NULL,
+  wrap_var=NULL, wrap_ncol=NULL,
   points=FALSE,
   only_ggplot=FALSE, subject_id=NULL, ...) {
+  
+  if((!is.null(facet_row) | !is.null(facet_col))& !is.null(wrap_var)) {
+    stop("wrap_var cannot be used in combination with facet_row and facet_col.")
+  }
 
   # Extract plotting options from metadata
-  use2_variables <- c(color, linetype, facet_row, facet_col)
+  use2_variables <- c(color, linetype, facet_row, facet_col, wrap_var)
   if (is.null(use2_variables) == FALSE){
     for (var in use2_variables){
       data[[use2]][,var] <- factor(data[[use2]][,var])
@@ -263,6 +282,12 @@ mt_plot_aggregate <- function(data,
     facet_formula <- stats::as.formula(paste(facet_row,facet_col,sep="~"))
     current_plot <- current_plot + ggplot2::facet_grid(facet_formula)
   }
+  
+  # Add wrapping (optional)
+  if(is.null(wrap_var)==FALSE) {
+    current_plot <- current_plot + ggplot2::facet_wrap(facets=wrap_var, ncol=wrap_ncol)
+  }
+  
 
   if (only_ggplot == TRUE) {
     # Return empty plot object
@@ -292,25 +317,25 @@ mt_plot_aggregate <- function(data,
 #' mouse-tracking experiment. It is specifically designed so that the arguments
 #' from the \code{mousetrap_response} plugin in OpenSesame can be used.
 #'
-#' \code{mt_plot_add_rect} internally uses \link[ggplot2]{geom_rect} of the
+#' \code{mt_plot_add_rect} internally uses \link[ggplot2:geom_tile]{geom_rect} of the
 #' \code{ggplot2} package for plotting.
 #'
 #' @param rect a data.frame or matrix with one row per box. For each rectangle,
 #'   the x-position (\code{x}), y-position (\code{y}), width (\code{w}), and
 #'   height (\code{h}) needs to be provided. If columns are not labeled, the
 #'   order \code{x, y, w, h} is assumed.
-#' @param color argument passed on to \link[ggplot2]{geom_rect}. Specifies the
+#' @param color argument passed on to \link[ggplot2:geom_tile]{geom_rect}. Specifies the
 #'   color of the border of the rectangles.
-#' @param fill argument passed on to \link[ggplot2]{geom_rect}. Specifies the
+#' @param fill argument passed on to \link[ggplot2:geom_tile]{geom_rect}. Specifies the
 #'   color of the interior of the rectangles. If \code{NA} (the default),
 #'   rectangles are unfilled.
-#' @param ... additional arguments passed on to \link[ggplot2]{geom_rect}.
+#' @param ... additional arguments passed on to \link[ggplot2:geom_tile]{geom_rect}.
 #'
 #' @seealso
 #' \link{mt_plot} for plotting trajectory data.
 #'
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 
@@ -424,7 +449,7 @@ mt_plot_add_rect <- function(rect,
 #' }
 #'
 #' @author
-#' Pascal J. Kieslich (\email{kieslich@@psychologie.uni-mannheim.de})
+#' Pascal J. Kieslich
 #' 
 #' Felix Henninger
 #' 

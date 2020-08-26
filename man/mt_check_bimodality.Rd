@@ -4,8 +4,15 @@
 \alias{mt_check_bimodality}
 \title{Assess bimodality of mouse-tracking measure distributions.}
 \usage{
-mt_check_bimodality(data, use = "measures", use_variables = NULL,
-  methods = c("BC", "HDS"), B = 2000, grouping_variables = NULL, ...)
+mt_check_bimodality(
+  data,
+  use = "measures",
+  use_variables = NULL,
+  methods = c("BC", "HDS"),
+  B = 2000,
+  grouping_variables = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a mousetrap data object created using one of the mt_import 
@@ -119,7 +126,7 @@ Processes & Intergroup Relations, 18}(3), 384-401.
   \link[diptest]{dip.test} for more information about Hartigan's dip test.
 }
 \author{
-Pascal J. Kieslich (\email{kieslich@psychologie.uni-mannheim.de})
+Pascal J. Kieslich
 
 Felix Henninger
 }

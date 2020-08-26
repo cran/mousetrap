@@ -4,8 +4,7 @@
 \alias{read_mt}
 \title{Read MouseTracker raw data.}
 \usage{
-read_mt(file, columns = "all", add_trialid = FALSE,
-  add_filename = FALSE)
+read_mt(file, columns = "all", add_trialid = FALSE, add_filename = FALSE)
 }
 \arguments{
 \item{file}{a character string specifying the filename of the .mt file.}
@@ -65,5 +64,5 @@ combining multiple raw data files.
 \link{mt_import_wide} to prepare the imported data for analyses in mousetrap.
 }
 \author{
-Dirk U. Wulff (\email{dirk.wulff@gmail.com})
+Dirk U. Wulff
 }
