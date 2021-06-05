@@ -91,7 +91,7 @@
 #'
 #' @references Kieslich, P. J., & Henninger, F. (2017). Mousetrap: An
 #'   integrated, open-source mouse-tracking package. \emph{Behavior Research
-#'   Methods, 49}(5), 1652-1667. \url{https://doi.org/10.3758/s13428-017-0900-z}
+#'   Methods, 49}(5), 1652-1667. \doi{10.3758/s13428-017-0900-z}
 #'
 #' @seealso \link[readbulk]{read_opensesame} from the \code{readbulk} library
 #'   for reading and combining raw data files that were collected with
@@ -227,7 +227,7 @@ mt_import_mousetrap <- function(raw_data,
   split_raw_data <- function(x) {
 
     # Remove all irrelevant characters
-    x <- gsub(pattern=paste0("[^-0123456789.",split,"]"),replacement = "", x)
+    x <- gsub(pattern=paste0("[^-e0123456789.",split,"]"),replacement = "", x)
 
     # Remove leading / end / double split characters
     x <- gsub(pattern=paste0("^",split),replacement = "", x)
