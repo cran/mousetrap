@@ -1,15 +1,15 @@
 Package: mousetrap
 Type: Package
-Version: 3.2.1
-Date: 2022-01-03
+Version: 3.2.2
 Title: Process and Analyze Mouse-Tracking Data
 Description: Mouse-tracking, the analysis of mouse movements in computerized
     experiments, is a method that is becoming increasingly popular in the
     cognitive sciences. The mousetrap package offers functions for importing,
     preprocessing, analyzing, aggregating, and visualizing mouse-tracking data.
     An introduction into mouse-tracking analyses using mousetrap can be found
-    in Wulff, Kieslich, Henninger, Haslbeck, & Schulte-Mecklenbeck (2021)
-    <doi:10.31234/osf.io/v685r> (preprint: <https://psyarxiv.com/v685r>).
+    in Wulff, Kieslich, Henninger, Haslbeck, & Schulte-Mecklenbeck (2023)
+    <doi:10.31234/osf.io/v685r> (preprint: 
+    <https://osf.io/preprints/psyarxiv/v685r>).
 Maintainer: Pascal J. Kieslich <pascal.kieslich@gmail.com>
 Authors@R: c(
     person(c("Pascal","J."), "Kieslich", role= c("aut", "cre"),
@@ -37,13 +37,13 @@ Suggests: readbulk, testthat
 LinkingTo: Rcpp
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 NeedsCompilation: yes
-Packaged: 2022-01-03 10:23:36 UTC; Pascal
+Packaged: 2023-10-23 14:34:40 UTC; Pascal
 Author: Pascal J. Kieslich [aut, cre] (<https://orcid.org/0000-0002-0853-9364>),
   Dirk U. Wulff [aut] (<https://orcid.org/0000-0002-4008-8022>),
   Felix Henninger [aut] (<https://orcid.org/0000-0002-7730-9511>),
   Jonas M. B. Haslbeck [aut],
   Sarah Brockhaus [ctb]
 Repository: CRAN
-Date/Publication: 2022-01-03 10:40:02 UTC
+Date/Publication: 2023-10-23 17:00:02 UTC
